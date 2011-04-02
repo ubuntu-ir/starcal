@@ -1,0 +1,10 @@
+#!/bin/bash
+main=scal2/ui_qt/starcal_qt.py
+if [ "$1" = "-q" ] ; then
+    shift
+    `dirname "$0"`/run $main "$@" 2>> error.log
+else
+    `dirname "$0"`/run $main "$@"
+fi
+
+

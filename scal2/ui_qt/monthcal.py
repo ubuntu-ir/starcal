@@ -1,0 +1,499 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2009-2011 Saeed Rasooli <saeed.gnu@gmail.com> (ilius)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, 
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along
+# with this program. If not, see <http://www.gnu.org/licenses/gpl.txt>.
+# Also avalable in /usr/share/common-licenses/GPL on Debian systems
+# or /usr/share/licenses/common/GPL3/license.txt on ArchLinux
+
+from time import time
+import sys, os
+from os.path import join, isfile
+
+from scal2.locale import tr as _
+from scal2.locale import rtl, rtlSgn
+
+from scal2 import core
+from scal2.core import myRaise, numLocale, getMonthName, getMonthLen, getNextMonth, getPrevMonth, pixDir
+
+from scal2 import ui
+from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
+
+from PyQt4 import QtGui as qt
+from PyQt4 import QtCore as qc
+
+from scal2.ui_qt.mywidgets import HBox, VBox
+from scal2.ui_qt.customize import MainWinItem
+
+def fillColor(cr, color):
+    if len(color)==3:
+        cr.set_source_rgb(color[0] / 255.0,
+                          color[1] / 255.0,
+                          color[2] / 255.0)
+    elif len(color)==4:
+        cr.set_source_rgba(color[0] / 255.0,
+                           color[1] / 255.0,
+                           color[2] / 255.0,
+                           color[3] / 255.0)
+    else:
+        raise ValueError
+    cr.fill()
+
+
+qfontDecode = lambda qfont: (
+    str(qfont.family()),
+    qfont.bold(),
+    qfont.italic(), 
+    qfont.pointSize()
+)
+
+qfontEncode = lambda font: qt.QFont(
+    font[0],
+    font[3], 
+    qt.QFont.Bold if font[1] else qt.QFont.Normal,
+    font[2]
+)
+
+
+def calcTextWidth(text, font=None):
+    if isinstance(text, str):
+        text = text.decode('utf-8')
+    if font==None:
+        qfont = qfontEncode(ui.fontDefault if ui.fontUseDefault
+                            else ui.fontCustom)
+    elif isinstance(font, tuple):
+        qfont = qfontEncode(font)
+    else:
+        qfont = font
+    n = len(text)
+    met = qt.QFontMetrics(font) ## OR met = widget.fontMetrics()
+    w = 0
+    for i in range(n):
+        w += met.charWidth(text, i)
+    return w
+
+
+## def newTextLayout(widget, text='', font=None): ????????
+
+
+
+
+
+class MonthCal(qt.QWidget, MainWinItem):
+    cx = [0, 0, 0, 0, 0, 0, 0]
+    def heightSpinChanged(self, value):## FIXME
+        h = int(value)
+        self.setFixedHeight(h)
+        ui.calHeight = h
+    confStr = lambda self: 'ui.calHeight=%r\n'%ui.calHeight
+    getDate = lambda self: (ui.cell.year, ui.cell.month, ui.cell.day)
+    def setDate(self, date):
+        (ui.cell.year, ui.cell.month, ui.cell.day) = date
+    def __init__(self, shownCals=ui.shownCals, parent=None):
+        qt.QWidget.__init__(self, parent)
+        #####################
+        if shownCals[0]['font']==None:
+            shownCals[0]['font'] = ui.fontDefault
+        (name, bold, underline, size) = ui.fontDefault
+        for item in shownCals[1:]:
+            if item['font']==None:
+                item['font'] = (name, bold, underline, int(size*0.6))
+        del name, bold, underline, size
+        #########################
+        hbox = HBox()
+        spin = qt.QSpinBox()
+        spin.setRange(1, 999)
+        spin.setSingleStep(1)
+        spin.setLayoutDirection(qc.Qt.LeftToRight)
+        spin.setValue(ui.calHeight)
+        self.connect(spin, qc.SIGNAL('valueChanged (int)'), self.heightSpinChanged)
+        hbox.addWidget(qt.QLabel(_('Height:')))
+        hbox.addWidget(spin)
+        MainWinItem.__init__(self, 'monthCal', _('Month Calendar'), optionsWidget=hbox)
+        self.setFixedHeight(ui.calHeight)
+        self.setSizePolicy(qt.QSizePolicy.Expanding, qt.QSizePolicy.Fixed)
+        ######################
+        self.shownCals = shownCals
+        ## self.supports_alpha = ## ??????????
+        #self.kTime = 0
+        self.customdayPixmaps = tuple([qt.QPixmap(item[1]) for item in ui.customdayModes])
+        ######################
+        ## Define drag and drop
+        ######################
+        self.myKeys = (
+            qc.Qt.Key_Up, qc.Qt.Key_Down, qc.Qt.Key_Right, qc.Qt.Key_Left, qc.Qt.Key_Space, qc.Qt.Key_Home, qc.Qt.Key_End,
+            qc.Qt.Key_PageUp, qc.Qt.Key_PageDown, qc.Qt.Key_Menu, qc.Qt.Key_F10, qc.Qt.Key_M
+        )
+        ######################
+        self.updateTextWidth()
+    def paintEvent(self, event):
+        self.updateTextWidth()
+        self.calcCoord()
+        w = self.width()
+        h = self.height()
+        #####
+        painter = qt.QPainter()
+        painter.begin(self)
+        #####
+        #painter.setPen(qt.QColor(*ui.bgColor))
+        painter.setBrush(qt.QColor(*ui.bgColor))
+        painter.drawRect(0, 0, w, h)
+        #####
+        status = getCurrentMonthStatus()
+        #################################### Drawing Border
+        if ui.calTopMargin>0:
+            ##### Drawing border top background
+            ##menuBgColor == borderColor ##???????????????
+            painter.setBrush(qt.QColor(*ui.borderColor))
+            painter.drawRect(0, 0, w, ui.calTopMargin)
+            ######## Drawing weekDays names
+            painter.setPen(qt.QColor(*ui.borderTextColor))
+            dx = 0
+            wdayAb = (self.wdaysWidth > w)
+            for i in xrange(7):
+                painter.drawText(self.cx[i]-self.dx/2.0, 0, self.dx, ui.calTopMargin,
+                                 qc.Qt.AlignCenter, core.getWeekDayAuto(i, wdayAb))
+            ######## Drawing "Menu" label
+            painter.setPen(qt.QColor(*ui.menuTextColor))
+            painter.drawText(
+                w - ui.calLeftMargin if rtl else 0,
+                0,
+                ui.calLeftMargin,
+                ui.calTopMargin,
+                qc.Qt.AlignCenter,
+                _('Menu')
+            )
+        if ui.calLeftMargin>0:
+            ##### Drawing border left background
+            painter.setBrush(qt.QColor(*ui.borderColor))
+            if rtl:
+                painter.drawRect(w-ui.calLeftMargin, ui.calTopMargin, ui.calLeftMargin, h-ui.calTopMargin)
+            else:
+                painter.drawRect(0, ui.calTopMargin, ui.calLeftMargin, h-ui.calTopMargin)
+            ##### Drawing week numbers
+            painter.setPen(qt.QColor(*ui.borderTextColor))
+            for i in xrange(6):
+                painter.drawText(
+                    w - ui.calLeftMargin if rtl else 0,
+                    self.cy[i]-self.dy/2.0, 
+                    ui.calLeftMargin,
+                    self.dy, 
+                    qc.Qt.AlignCenter,
+                    numLocale(status.weekNum[i])
+                )
+        cursor = True ## FIXME
+        quad = 90 ## 90*16
+        selectedCellPos = ui.cell.monthPos
+        shown = self.shownCals
+        for yPos in xrange(6):
+            for xPos in xrange(7):
+                c = status[yPos][xPos]
+                x0 = self.cx[xPos]
+                y0 = self.cy[yPos]
+                cellHasCursor = (cursor and (xPos, yPos) == selectedCellPos)
+                if cellHasCursor:
+                    ##### Drawing Cursor
+                    d=ui.cursorD
+                    if ui.cursorFixed:
+                        cx0 = x0-ui.cursorW/2.0 - d
+                        cy0 = y0-ui.cursorH/2.0 - d
+                        cw = ui.cursorW + 2*d
+                        ch = ui.cursorH + 2*d
+                    else:
+                        eps = 0.3 ## ????????????
+                        cx0 = x0 - self.dx/2.0 + eps
+                        cy0 = y0 - self.dy/2.0 + eps
+                        cw = self.dx - 1 - 2*eps
+                        ch = self.dy - 1 - 2*eps
+                    painter.setBrush(qt.QColor(*ui.cursorBgColor))
+                    if ui.cursorR==0:
+                        painter.drawRect(cx0, cy0, cw, ch)
+                    else:
+                        ## if round_oval: ## ??????
+                        ######### Circular Rounded
+                        ro = min(ui.cursorR, cw/2, ch/2)
+                        #a = min(cw, ch); ri = ro*(a-2*d)/a
+                        ri = max(ro-d, 0)
+                        ######### Outline:
+                        path = qt.QPainterPath()
+                        path.moveTo(cx0+ro, cy0)
+                        path.lineTo(cx0+cw-ro, cy0)
+                        path.arcTo(cx0+cw-2*ro, cy0, 2*ro, 2*ro, quad, -quad)## up right corner
+                        path.lineTo(cx0+cw, cy0+ch-ro)
+                        path.arcTo(cx0+cw-2*ro, cy0+ch-2*ro, 2*ro, 2*ro, 0, -quad)## down right corner
+                        path.lineTo(cx0+ro, cy0+ch)
+                        path.arcTo(cx0, cy0+ch-2*ro, 2*ro, 2*ro, -quad, -quad)## down left corner
+                        path.lineTo(cx0, cy0+ro)
+                        path.arcTo(cx0, cy0, 2*ro, 2*ro, -2*quad, -quad)## up left corner
+                        ####
+                        painter.drawPath(path)
+                        ##if round_oval:##???????
+                        ##### end of Drawing Cursor
+                    if c.customday!=None and ui.customdayShowIcon:
+                        ## right buttom corner ?????????????????????
+                        pix = qt.QPixmap(join(pixDir, ui.customdayModes[c.customday['type']][1]))
+                        painter.drawPixmap(self.cx[xPos]+self.dx/2.0-pix.width(),# right side
+                                           self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
+                                           self.customdayPixmaps[c.customday['type']])
+                item = shown[0]
+                if item['enable']:
+                    mode = item['mode']
+                    num = numLocale(c.dates[mode][2], mode)
+                    qfont = qfontEncode(item['font'])
+                    met = qt.QFontMetrics(qfont)
+                    fontw = met.maxWidth() * len(num)
+                    fonth = met.height()
+                    painter.setFont(qfont)
+                    if c.month!=ui.cell.month:
+                        painter.setPen(qt.QColor(*ui.inactiveColor))
+                    elif c.holiday:
+                        painter.setPen(qt.QColor(*ui.holidayColor))
+                    else:
+                        painter.setPen(qt.QColor(*item['color']))
+                    painter.drawText(x0 - fontw/2.0 + item['x'],
+                                     y0 - fonth/2.0 + item['y'],
+                                     fontw,
+                                     fonth,
+                                     qc.Qt.AlignCenter,
+                                     num)
+                if c.month==ui.cell.month:
+                    for item in shown[1:]:
+                        if item['enable']:
+                            mode = item['mode']
+                            num = numLocale(c.dates[mode][2], mode)
+                            qfont = qfontEncode(item['font'])
+                            met = qt.QFontMetrics(qfont)
+                            fontw = met.maxWidth() * len(num)
+                            fonth = met.height()
+                            painter.setFont(qfont)
+                            painter.setPen(qt.QColor(*item['color']))
+                            painter.drawText(x0 - fontw/2.0 + item['x'],
+                                             y0 - fonth/2.0 + item['y'],
+                                             fontw,
+                                             fonth,
+                                             qc.Qt.AlignCenter,
+                                             num)
+                    if cellHasCursor:
+                        ##### Drawing Cursor Outline
+                        d = ui.cursorD
+                        if ui.cursorFixed:
+                            cx0 = x0 - ui.cursorW/2.0 - d
+                            cy0 = y0 - ui.cursorH/2.0 - d
+                            cw = ui.cursorW + 2*d
+                            ch = ui.cursorH + 2* d
+                        else:
+                            eps = 0.3 ## ????????????
+                            cx0 = x0-self.dx/2.0 + eps
+                            cy0 = y0-self.dy/2.0 + eps
+                            cw = self.dx - 1 - 2*eps
+                            ch = self.dy - 1 - 2*eps
+                        painter.setBrush(qt.QColor(*ui.cursorOutColor))
+                        path = qt.QPainterPath()
+                        if ui.cursorR==0:
+                            path.moveTo(cx0, cy0)
+                            path.lineTo(cx0+cw, cy0)
+                            path.lineTo(cx0+cw, cy0+ch)
+                            path.lineTo(cx0, cy0+ch)
+                            path.lineTo(cx0, cy0)
+                            #####
+                            path.moveTo(cx0+d, cy0+d)
+                            path.lineTo(cx0+d, cy0+ch-d)
+                            path.lineTo(cx0+cw-d, cy0+ch-d)
+                            path.lineTo(cx0+cw-d, cy0+d)
+                            path.lineTo(cx0+d, cy0+d)
+                        else:
+                            ## if round_oval: #??????????
+                            ######### Circular Rounded
+                            ro = min(ui.cursorR, cw/2, ch/2)
+                            #a = min(cw, ch); ri = ro*(a-2*d)/a
+                            d = min(d, ro)
+                            ri = ro-d
+                            ######### Outline:
+                            path.moveTo(cx0+ro, cy0)
+                            path.lineTo(cx0+cw-ro, cy0)
+                            path.arcTo(cx0+cw-2*ro, cy0, 2*ro, 2*ro, quad, -quad) ## up right corner
+                            path.lineTo(cx0+cw, cy0+ch-ro)
+                            path.arcTo(cx0+cw-2*ro, cy0+ch-2*ro, 2*ro, 2*ro, 0, -quad) ## down right corner
+                            path.lineTo(cx0+ro, cy0+ch)
+                            path.arcTo(cx0, cy0+ch-2*ro, 2*ro, 2*ro, -quad, -quad) ## down left corner
+                            path.lineTo(cx0, cy0+ro)
+                            path.arcTo(cx0, cy0, 2*ro, 2*ro, -2*quad, -quad) ## up left corner
+                            #### Inline:
+                            path.moveTo(cx0+ro, cy0+d) ## or line to?
+                            path.arcTo(cx0+d, cy0+d, 2*ri, 2*ri, quad, quad) ## up left corner
+                            path.lineTo(cx0+d, cy0+ch-ro)
+                            path.arcTo(cx0+d, cy0+ch-ro-ri, 2*ri, 2*ri, 2*quad, quad) ## down left
+                            path.lineTo(cx0+cw-ro, cy0+ch-d)
+                            path.arcTo(cx0+cw-ro-ri, cy0+ch-ro-ri, 2*ri, 2*ri, 3*quad, quad) ## down right
+                            path.lineTo(cx0+cw-d, cy0+ro)
+                            path.arcTo(cx0+cw-ro-ri, cy0+d, 2*ri, 2*ri, 0, quad) ## up right
+                            path.lineTo(cx0+ro, cy0+d)
+                            ####
+                            painter.drawPath(path)
+                            ## if round_oval: ## ??????
+                            ##### end of Drawing Cursor Outline
+
+
+        ##### drawGrid
+        if ui.calGrid:
+            painter.setBrush(qt.QColor(*ui.gridColor))
+            for i in xrange(7):
+                painter.drawRect(self.cx[i]+rtlSgn()*self.dx/2.0, 0, 1, h)
+            for i in xrange(6):
+                painter.drawRect(0, self.cy[i]-self.dy/2.0, w, 1)
+    ## def dragDataGet
+    ## def dragLeave
+    ## def dragDataRec
+    ## def dragBegin
+    def updateTextWidth(self):
+        ### update width of week days names to understand that should be
+        ### synopsis or no
+        qfont = qfontEncode(ui.fontDefault if ui.fontUseDefault
+                                                                                        else ui.fontCustom)
+        wm = 0 ## max width
+        for i in xrange(7):
+            w = calcTextWidth(core.weekDayName[i], qfont)
+            #print w, 
+            if w > wm:
+                wm = w
+        self.wdaysWidth = wm*7 + ui.calLeftMargin
+        #print 'max =', wm, '     wdaysWidth =', self.wdaysWidth
+    def calcCoord(self):## calculates coordidates (x and y of cells centers)
+        w = self.width()
+        h = self.height()
+        if rtl:
+            self.cx = [ (w-ui.calLeftMargin)*(13.0-2*i)/14.0 \
+                                 for i in xrange(7) ] ## centers x
+        else:
+            self.cx = [ui.calLeftMargin \
+                                 + (w-ui.calLeftMargin)*(1.0+2*i)/14.0 \
+                                 for i in xrange(7) ] ## centers x
+        self.cy = [ui.calTopMargin + (h-ui.calTopMargin)*(1.0+2*i)/12.0 \
+                             for i in xrange(6) ] ## centers y
+        self.dx = (w-ui.calLeftMargin)/7.0 ## delta x
+        self.dy = (h-ui.calTopMargin)/6.0 ## delta y
+    def keyPressEvent(self, event):
+        k = event.key()
+        print time(), 'MonthCal.keyPressEvent', k, hex(k)
+        if k==qc.Qt.Key_Up:
+            self.jdPlus(-7)
+        elif k==qc.Qt.Key_Down:
+            self.jdPlus(7)
+        elif k==qc.Qt.Key_Right:
+            if rtl:
+                self.jdPlus(-1)
+            else:
+                self.jdPlus(1)
+        elif k==qc.Qt.Key_Left:
+            if rtl:
+                self.jdPlus(1)
+            else:
+                self.jdPlus(-1)
+        elif k==qc.Qt.Key_Space or k==qc.Qt.Key_Home:
+            self.goToday()
+        elif k==qc.Qt.Key_End:
+            self.changeDate(ui.cell.year, ui.cell.month, getMonthLen(ui.cell.year, ui.cell.month, core.primaryMode))
+        elif k==qc.Qt.Key_End:
+            self.changeDate(ui.cell.year, ui.cell.month, getMonthLen(ui.cell.year, ui.cell.month, core.primaryMode))
+        elif k==qc.Qt.Key_PageUp:
+            (year, month) = getPrevMonth(ui.cell.year, ui.cell.month)
+            self.changeDate(year, month, ui.cell.day)
+        elif k==qc.Qt.Key_PageDown:
+            (year, month) = getNextMonth(ui.cell.year, ui.cell.month)
+            self.changeDate(year, month, ui.cell.day)
+        elif k==qc.Qt.Key_Menu:# Simulate right click (key beside Right-Ctrl)
+            self.emit(qc.SIGNAL('popup-menu-cell'), *self.getCellPos())
+        elif k in (qc.Qt.Key_F10, qc.Qt.Key_M):
+            #print 'keyPressEvent: menu', event.modifiers()
+            if event.modifiers() & qc.Qt.ShiftModifier:
+                ## Simulate right click (key beside Right-Ctrl)
+                print 'popup-menu-cell'
+                self.emit(qc.SIGNAL('popup-menu-cell'), *self.getCellPos())
+            else:
+                print 'popup-menu-main'
+                self.emit(qc.SIGNAL('popup-menu-main'), *self.getMainMenuPos())
+        else:
+            event.ignore() ## I dont want the event. Propagate to the parent widget.
+            #print time(), 'MonthCal.keyPressEvent', hex(k)
+            return
+        event.accept() ## I want the event. Do not propagate to the parent widget.
+    def mousePressEvent(self, event):
+        #print 'monthcal: mousePressEvent'
+        x= event.x()
+        y = event.y()
+        b = event.button()
+        #self.pointer = (x, y) ## needed? FIXME
+        if b!=qc.Qt.MidButton:
+            sx = -1
+            sy = -1
+            for i in xrange(7):
+                if abs(x-self.cx[i]) <= self.dx/2.0:
+                    sx = i
+                    break
+            for i in xrange(6):
+                if abs(y-self.cy[i]) <= self.dy/2.0:
+                    sy = i
+                    break
+            status = getCurrentMonthStatus()
+            if sy==-1 or sx==-1:
+                self.emit(qc.SIGNAL('popup-menu-main'), x, y)
+                #self.menuMainWidth = self.menuMain.width()
+            elif sy>=0 and sx>=0:
+                cell = status[sy][sx]
+                self.changeDate(*cell.dates[core.primaryMode])
+                if event.type()==qc.QEvent.MouseButtonDblClick:
+                    self.emit(qc.SIGNAL('2button-press')) ## Needed??
+                if b==qc.Qt.RightButton and cell.month==ui.cell.month:## right click
+                    #self.emit(qc.SIGNAL('popup-menu-cell'), *self.getCellPos())
+                    self.emit(qc.SIGNAL('popup-menu-cell'), x, y)
+        event.accept()## FIXME
+    def wheelEvent(self, event):## scroll
+        if event.orientation()==qc.Qt.Vertical:
+            if event.delta()>0:
+                self.jdPlus(-7)
+            else:
+                self.jdPlus(7)
+    def jdPlus(self, plus):
+        ui.jdPlus(plus)
+        self.update()
+        self.emit(qc.SIGNAL('date-change'), self)
+    def changeDate(self, year, month, day, mode=None):
+        ui.changeDate(year, month, day, mode)
+        self.update()## equivalent of self.queue_draw() in GTK
+        self.emit(qc.SIGNAL('date-change'), self)
+    goToday = lambda self, widget=None: self.changeDate(*core.getSysDate())
+    getCellPos = lambda self: (int(self.cx[ui.cell.monthPos[0]]), 
+                               int(self.cy[ui.cell.monthPos[1]] + self.dy/2.0))
+    def getMainMenuPos(self):#???????????????????
+        if rtl:
+            return (int(self.width() - ui.calLeftMargin/2.0),
+                    int(ui.calTopMargin/2.0))
+        else:
+            return (int(ui.calLeftMargin/2.0),
+                    int(ui.calTopMargin/2.0))
+    def onDateChange(self):
+        self.update()## equivalent of self.queue_draw() in GTK
+    def onConfigChange(self):
+        self.shownCals = ui.shownCals
+        self.updateTextWidth()
+
+
+if __name__=='__main__':
+    app = qt.QApplication(sys.argv)
+    w = MonthCal()
+    #w.resize(ui.winWidth, ui.calHeight)
+    w.show()
+    sys.exit(app.exec_())
+
+
