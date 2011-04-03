@@ -1,10 +1,14 @@
 #!/bin/bash
 main=scal2/ui_qt/starcal_qt.py
+myDir=`dirname "$0"`
+if [ ! -d ~/.starcal2 ] ; then
+    "$myDir/run" scal2/ui_gtk/config_importer.py ## FIXME
+fi
 if [ "$1" = "-q" ] ; then
     shift
-    `dirname "$0"`/run $main "$@" 2>> error.log
+    "$myDir/run" $main "$@" 2>> error.log
 else
-    `dirname "$0"`/run $main "$@"
+    "$myDir/run" $main "$@"
 fi
 
 
