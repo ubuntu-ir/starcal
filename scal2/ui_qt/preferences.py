@@ -1256,7 +1256,7 @@ class PrefDialog(qt.QWidget):
         else:
             self.mainWin = mainWin
             trayMode = mainWin.trayMode
-        qt.QWidget.__init__(self)#, None, qc.Qt.Tool)
+        qt.QWidget.__init__(self, None, qc.Qt.Tool)
         self.setWindowTitle(_('Preferences'))
         ## qc.Qt.Tool    ====>    No taskbar hint
         ## qc.Qt.X11BypassWindowManagerHint    ==> Popup(no control for window manager)
