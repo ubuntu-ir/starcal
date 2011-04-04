@@ -1180,7 +1180,7 @@ class MainWin(qt.QMainWindow):
         toolbar = CustomizableToolbar(self)
         #####################
         if not ui.toolbarItems:
-            ui.toolbarItems = [(item.name, True) for item in prefrences.toolbarItemsData]
+            ui.toolbarItems = [(item.name, True) for item in preferences.toolbarItemsData]
         for (name, enable) in ui.toolbarItems:
             try:
                 tbItem = preferences.toolbarItemsDataDict[name]
