@@ -211,11 +211,15 @@ if os.path.isfile(customizeConfPath):
         myRaise(__file__)
 
 
-if adjustTimeCmd=='':
-    for cmd in ('kdesudo', 'kdesu', 'gksudo', 'gksu', 'gnomesu'):
-        if os.path.isfile('/usr/bin/%s'%cmd):
-            adjustTimeCmd = '%s \'%s\''%(cmd, join(rootDir, 'ui_qt', 'adjust_dtime.py'))
-            break
+#if adjustTimeCmd=='':## FIXME
+for cmd in ('kdesudo', 'kdesu', 'gksudo', 'gksu', 'gnomesu'):
+    if os.path.isfile('/usr/bin/%s'%cmd):
+        adjustTimeCmd = [
+            cmd,
+            join(rootDir, 'run'),
+            'scal2/ui_gtk/adjust_dtime.py', ## implement in qt FIXME
+        ]
+        break
 
 
 ## r, g, b in range(256)
