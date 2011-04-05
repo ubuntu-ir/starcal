@@ -1265,7 +1265,7 @@ class MainWin(qt.QMainWindow):
             'Martin Grimme <martin@pycage.de>',
             'شورای مرکز تقویم مؤسسهٔ ژئوفیزیک دانشگاه تهران',
             'رضا مرادی قیاس آبادی(www.ghiasabadi.com)'])
-        about.set_comments(_('A Perfect Calendar Program Writen in Python\nCopyleft © 2008-2010 Saeed Rasooli\nStarCalendar is distributed under the GNU General Public License'))
+        about.set_comments(core.aboutText)
         about.set_license(core.licenseText)
         about.set_wrap_license(True)
         about.set_website(core.homePage) ## A palin label (not link)
