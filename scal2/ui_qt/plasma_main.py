@@ -1,1 +1,0 @@
-/data/programming/calendar-work/starcal2/pkg/plasma/contents/code/main.py
