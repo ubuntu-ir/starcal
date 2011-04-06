@@ -1,0 +1,19 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=StarCalendar
+Name[fa]=استارکلندر
+Type=Service
+ServiceTypes=Plasma/Applet
+Icon=starcal2
+X-Plasma-API=python
+X-Plasma-MainScript=code/main.py
+X-KDE-PluginInfo-Author=Saeed Rasooli
+X-KDE-PluginInfo-Email=saeed.gnu@gmail.com
+X-KDE-PluginInfo-Name=starcal2
+X-KDE-PluginInfo-Descrition=A Perfect Calendar in PyGTK
+X-KDE-PluginInfo-Version=1.0
+X-KDE-PluginInfo-Website=http://starcal.sourceforge.net/
+X-KDE-PluginInfo-Category=Utilities
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-EnabledByDefault=true
