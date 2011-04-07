@@ -1734,6 +1734,7 @@ class MainWin(qt.QMainWindow):
             #self.raise_()
             self.show()## does not work!
     def closeEvent(self, event):
+        print '--------------- MainWin.closeEvent'
         p = self.pos()
         ui.winX = p.x()
         ui.winY = p.y()
