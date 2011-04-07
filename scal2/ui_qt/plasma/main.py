@@ -31,17 +31,18 @@ if not os.path.isdir(rootDir):
 
 sys.argv = [__file__]
 
-sys.path.insert(0, dirname(rootDir))
+sys.path.insert(0, rootDir)
 
 from math import ceil
-from time import strftime
+from time import time, localtime
+from time import strftime ## FIXME replcae with my own format_time
+
+from scal2 import core
+from scal2.core import numLocale
 
 from scal2.locale import tr as _
 from scal2.locale import rtl
 
-
-from scal2 import core
-from scal2.core import numLocale
 
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
@@ -50,7 +51,7 @@ import PyKDE4
 import PyKDE4.plasma
 import PyKDE4.plasmascript
 
-from scal2.ui_qt.preferences import qpixDir, strftime, dateStr
+from scal2.ui_qt.preferences import qpixDir
 from scal2.ui_qt.starcal_qt import *
 from scal2.ui_qt import preferences
 
@@ -81,7 +82,7 @@ class PClockLabel(PyKDE4.plasma.Plasma.Label):
     def __init__(self, parent=None):
         '''format is a string that used in strftime()
         for example format can be "<b>%T</b>"
-        local is bool. if True, use Local time. and if False, use GMT time.
+        local is bool. if True, use Local time, and if False, use GMT time
         selectable is bool that passes to GtkLabel'''
         PyKDE4.plasma.Plasma.Label.__init__(self, parent)
         #self.setTextFormat(qc.Qt.PlainText)#??????????
@@ -96,7 +97,7 @@ class PClockLabel(PyKDE4.plasma.Plasma.Label):
         self.update()
     def update(self):
         if self.running:
-            self.timer.singleShot(int(1000*(1-time.time()%1)), self.update)
+            self.timer.singleShot(int(1000*(1-time()%1)), self.update)
             try:
                 self.setText(strftime(self.format).decode('utf-8'))
             except:
@@ -119,15 +120,10 @@ class StarCalApplet(MainWin):
         self.timer.start(self.timeout)
         ######
         self.trayUpdate() ## ??????? Needed?
-        ######
-        #self.connect('main-show', lambda arg: self.dialog.present())
-        #self.connect('main-hide', lambda arg: self.dialog.hide())
-    def dialogClose(self, *args):
+    def closeEvent(self, event):
+        print '--------------- StarCalApplet.closeEvent'
         self.tbutton.setChecked(False)
-        self.dialog.hide()
-    def dialogEsc(self):
-        self.tbutton.setChecked(False)
-        self.dialog.hide()
+        MainWin.closeEvent(self, event)
     def trayInit(self):
         self.tbutton.setCheckable(True)
         #qc.QObject.connect(self.tbutton, qc.SIGNAL('pressed()'), self.appletButtonPress)
@@ -167,20 +163,20 @@ class StarCalApplet(MainWin):
             #if ui.winX==0 and ui.winY==0:##??????????????????
             #ui.winX = self.papplet.x()
             #ui.winY = self.papplet.y()
-            self.dialog.move(ui.winX, ui.winY)
+            self.move(ui.winX, ui.winY)
             ## every calling of .hide() and .present(), makes
-            ## dialog not on top (forgets being on top)
-            act = self.checkAbove.get_active()
-            self.dialog.set_keep_above(act)
-            self.dialog.lowerWin.set_keep_above(act)
-            if self.checkSticky.get_active():
-                self.dialog.stick()
-                self.dialog.lowerWin.stick()
-            self.dialog.deiconify()
-            self.dialog.present()#????? Segmentation fault on KDE 4.1
+            ## window not on top (forgets being on top)
+            #act = self.actionAbove.isChecked()
+            #self.set_keep_above(act)
+            #if self.checkSticky.isChecked():
+            #    self.stick()
+            #self.deiconify()
+            self.show()## raise_() does not work
         else:
-            (ui.winX, ui.winY) = self.dialog.get_position()
-            self.dialog.hide()
+            p = self.pos()
+            ui.winX = p.x()
+            ui.winY = p.y()
+            self.hide()
     def appletButtonPress(self, *args):
         print 'appletButtonPress', args
         ## ????? Check if button==3 open the menu
@@ -200,14 +196,13 @@ class StarCalApplet(MainWin):
                 self.clockTr.hide()
     def trayUpdate(self, gdate=None, checkDate=True):## FIXME
         if gdate==None:
-            gdate = time.localtime()[:3]
+            gdate = localtime()[:3]
         if self.lastGDate!=gdate or not checkDate:
             jd = core.modules[core.DATE_GREG].to_jd(*gdate)
             if core.primaryMode==core.DATE_GREG:
                 ddate = gdate
             else:
                 ddate = core.modules[core.primaryMode].jd_to(jd)
-            print('Updating tray to date %s'%dateStr(core.primaryMode, *ddate))
             self.lastGDate = gdate
             ui.todayCell = ui.cellCache.getTodayCell()
             imPath = ui.trayImageHoli if ui.todayCell.holiday else ui.trayImage
