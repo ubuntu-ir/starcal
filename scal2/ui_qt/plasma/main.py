@@ -23,25 +23,29 @@
 
 import sys, os
 from os.path import dirname, join
-
-rootDir = '/usr/share/starcal2'
-
-if not os.path.isdir(rootDir):
-    raise OSError('starcal2 is not currently installed!')
-
-sys.argv = [__file__]
-
-sys.path.insert(0, rootDir)
-
 from math import ceil
 from time import time, localtime
 from time import strftime ## FIXME replcae with my own format_time
 
+rootDir = '/usr/share/starcal2'
+if not os.path.isdir(rootDir):
+    raise OSError('starcal2 is not currently installed!')
+sys.argv = [__file__]
+sys.path.insert(0, rootDir)
+
+
+from scal2.ui_qt.starcal_qt import * ## before import tr as _
+
+from scal2.locale import rtl
+from scal2.locale import tr as _
+#from scal2.locale import loadTranslator
+#_ = loadTranslator(True)## FIXME
+
 from scal2 import core
 from scal2.core import numLocale
 
-from scal2.locale import tr as _
-from scal2.locale import rtl
+from scal2.ui_qt.preferences import qpixDir
+from scal2.ui_qt import preferences
 
 
 from PyQt4 import QtGui as qt
@@ -51,9 +55,7 @@ import PyKDE4
 import PyKDE4.plasma
 import PyKDE4.plasmascript
 
-from scal2.ui_qt.preferences import qpixDir
-from scal2.ui_qt.starcal_qt import *
-from scal2.ui_qt import preferences
+
 
 """
 def removeXml(st):
