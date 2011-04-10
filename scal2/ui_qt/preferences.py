@@ -1771,7 +1771,10 @@ class PrefDialog(qt.QWidget):
     def comboFirstWDChanged(self, index):
         f = index ## self.comboFirstWD.currentIndex() ## 0 means Sunday
         if f==7: ## auto
-            f = core.getLocaleFirstWeekDay()
+            try:
+                f = core.getLocaleFirstWeekDay()
+            except:
+                pass
         ## core.firstWeekDay will be later = f
         self.holiWDItem.setStart(f)
     """
@@ -1879,7 +1882,10 @@ class PrefDialog(qt.QWidget):
         first = self.comboFirstWD.currentIndex()
         if first==7:
             core.firstWeekDayAuto = True
-            core.firstWeekDay = core.getLocaleFirstWeekDay()
+            try:
+                core.firstWeekDay = core.getLocaleFirstWeekDay()
+            except:
+                pass
         else:
             core.firstWeekDayAuto = False
             core.firstWeekDay = first
