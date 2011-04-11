@@ -1148,6 +1148,7 @@ class MainWin(qt.QMainWindow):
         #self.raise_()## does not work!
     def __init__(self, trayMode=2):
         qt.QMainWindow.__init__(self, None, self.getMyWindowFlags())
+        self.setWindowIcon(qt.QIcon(ui.logo))
         self.setContentsMargins(0, 0, 0, 0)
         ##################
         ## trayMode:
