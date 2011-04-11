@@ -1,8 +1,8 @@
 #!/bin/bash
-main=scal2/ui_qt/starcal_qt.pyw
+main=scal2/ui_qt/starcal_qt.py
 myDir=`dirname "$0"`
 if [ ! -d ~/.starcal2 ] ; then
-    "$myDir/run" scal2/ui_qt/config_importer.pyw
+    "$myDir/run" scal2/ui_qt/config_importer.py
 fi
 if [ "$1" = "-q" ] ; then
     shift
