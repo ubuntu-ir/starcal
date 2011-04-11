@@ -615,8 +615,7 @@ class CheckPrefItem(PrefItem):
         self.widget = w
         self.widget.setSizePolicy(qt.QSizePolicy.Minimum, qt.QSizePolicy.Fixed)
         self.get = lambda: w.checkState()==qc.Qt.Checked
-        self.set = lambda v: w.setCheckState(qc.Qt.Checked if v\
-                                                                                                             else qc.Qt.Unchecked)
+        self.set = lambda v: w.setCheckState(qc.Qt.Checked if v else qc.Qt.Unchecked)
 
 
 
@@ -630,8 +629,7 @@ class CheckStartupPrefItem(PrefItem):### cbStartCommon
         self.widget = w
         self.widget.setSizePolicy(qt.QSizePolicy.Minimum, qt.QSizePolicy.Fixed)
         self.get = lambda: w.checkState()==qc.Qt.Checked
-        self.set = lambda v: w.setCheckState(qc.Qt.Checked if v\
-                                                                                                             else qc.Qt.Unchecked)
+        self.set = lambda v: w.setCheckState(qc.Qt.Checked if v else qc.Qt.Unchecked)
     def addStartup(self, path):
         text='''[Desktop Entry]
 Type=Application
@@ -844,8 +842,7 @@ class CalPropPrefItem(PrefItem):
         assert len(data)==self.num ## ?????????????
         for i in range(self.num):
             item = data[i]
-            self.checkb[i].setCheckState(qc.Qt.Checked if item['enable']\
-                                                                                                 else qc.Qt.Unchecked)
+            self.checkb[i].setCheckState(qc.Qt.Checked if item['enable'] else qc.Qt.Unchecked)
             self.combo[i].setCurrentIndex(item['mode'])
             self.spinX[i].setValue(item['x'])
             self.spinY[i].setValue(item['y'])
@@ -1026,8 +1023,7 @@ class PluginTreeview(qt.QTreeWidget):
         plug = core.allPlugList[j]
         if plug.about==None:
             return
-        text = plug.about.decode('utf-8')+u'\n'+_('Credits')+u':\n\t'\
-                     +'\n\t'.join(plug.authors).decode('utf-8')
+        text = plug.about.decode('utf-8') + u'\n' + _('Credits') + u':\n\t' + '\n\t'.join(plug.authors).decode('utf-8')
         qt.QMessageBox.about(self, _('About Plugin'), text)
         """## ??????????????????????????
         about = gtk.AboutDialog()
@@ -1514,7 +1510,7 @@ class PrefDialog(qt.QWidget):
         ##
         menu = qt.QMenu()
         for stock in (STOCK_GO_UP,STOCK_GO_DOWN,STOCK_GO_BACK,STOCK_GO_FORWARD,\
-        STOCK_ZOOM_IN,STOCK_ZOOM_OUT,STOCK_ADD,STOCK_REMOVE):
+                      STOCK_ZOOM_IN,STOCK_ZOOM_OUT,STOCK_ADD,STOCK_REMOVE):
                 action = menu.addAction(QIcon('???'), '', self.imageSet)
                 action.stock = stock
         for arrow in (ARROW_LEFT, ARROW_RIGHT, ARROW_UP, ARROW_DOWN):
@@ -1945,8 +1941,7 @@ class PrefDialog(qt.QWidget):
         """
         if ui.bgUseDesk and ui.bgColor[3]==255:
             msg = gtk.MessageDialog(buttons=gtk.BUTTONS_OK_CANCEL, message_format=_(
-            'If you want to have a transparent calendar (and see your desktop),'+\
-            'change the opacity of calendar background color!'))
+            'If you want to have a transparent calendar (and see your desktop), change the opacity of calendar background color!'))
             if msg.run()==gtk.RESPONSE_OK:
                 self.colorbBg.emit('clicked')
             msg.destroy()
