@@ -1750,6 +1750,7 @@ class MainWin(qt.QMainWindow):
         if self.trayMode==2:
             self.sysTray.setVisible(False) ## needed for windows ## before or after main_quit ?
         print 'Exiting...'
+        self.destroy()
         qc.QCoreApplication.quit()
     def adjustTime(self, widget=None, event=None):
         os.popen2(preferences.adjustTimeCmd) ## Replace with subprocess
