@@ -22,7 +22,7 @@
 
 import os, sys
 
-from scal2.locale import tr as _
+from scal2.locale_man import tr as _
 
 from scal2 import core
 from scal2.core import convert, getMonthName, getMonthLen
@@ -285,7 +285,7 @@ class SelectDateDialog(qt.QWidget):
 '''
 if __name__=='__main__':
     import time
-    from scal2.locale import rtl
+    from scal2.locale_man import rtl
     app = qt.QApplication(sys.argv)
     if rtl:
         app.setLayoutDirection(qc.Qt.RightToLeft)
