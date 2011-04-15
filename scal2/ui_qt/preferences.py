@@ -28,8 +28,8 @@ from os.path import join as join
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
 
-from scal2.locale import tr as _
-from scal2.locale import langDict
+from scal2.locale_man import tr as _
+from scal2.locale_man import langDict
 
 from scal2 import core
 from scal2.core import convert, numLocale, myRaise, rootDir, pixDir, confDir, sysConfDir
@@ -1995,7 +1995,7 @@ class PrefDialog(qt.QWidget):
         #self.plugDescCell.set_property('wrap-width', self.plugDescCol.get_width()+2)
 
 if __name__=='__main__':
-    from scal2.locale import rtl
+    from scal2.locale_man import rtl
     app = qt.QApplication(sys.argv)
     if rtl:
         app.setLayoutDirection(qc.Qt.RightToLeft)

@@ -26,9 +26,9 @@ from subprocess import Popen
 from scal2.paths import *
 from scal2 import core
 
-from scal2.locale import rtl, lang, loadTranslator ## import scal2.locale after core
+from scal2.locale_man import rtl, lang, loadTranslator ## import scal2.locale_man after core
 _ = loadTranslator(True)## FIXME
-#from scal2.locale import tr as _
+#from scal2.locale_man import tr as _
 
 from scal2.core import convert, numLocale, getMonthName, getMonthLen, getNextMonth, getPrevMonth
 

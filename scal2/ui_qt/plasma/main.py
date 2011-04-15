@@ -36,9 +36,9 @@ sys.path.insert(0, rootDir)
 
 from scal2.ui_qt.starcal_qt import * ## before import tr as _
 
-from scal2.locale import rtl
-from scal2.locale import tr as _
-#from scal2.locale import loadTranslator
+from scal2.locale_man import rtl
+from scal2.locale_man import tr as _
+#from scal2.locale_man import loadTranslator
 #_ = loadTranslator(True)## FIXME
 
 from scal2 import core

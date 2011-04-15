@@ -21,8 +21,8 @@ from time import time
 import sys, os
 from os.path import join, isfile
 
-from scal2.locale import tr as _
-from scal2.locale import rtl, rtlSgn
+from scal2.locale_man import tr as _
+from scal2.locale_man import rtl, rtlSgn
 
 from scal2 import core
 from scal2.core import myRaise, numLocale, getMonthName, getMonthLen, getNextMonth, getPrevMonth, pixDir

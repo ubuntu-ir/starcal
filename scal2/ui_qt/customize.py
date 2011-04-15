@@ -20,8 +20,8 @@
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
 
-from scal2.locale import tr as _
-from scal2.locale import rtl
+from scal2.locale_man import tr as _
+from scal2.locale_man import rtl
 
 from scal2 import core
 from scal2.core import myRaise
