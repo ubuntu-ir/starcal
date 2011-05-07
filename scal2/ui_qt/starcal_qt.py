@@ -557,29 +557,25 @@ class AboutDialog(qt.QWidget):
     def make_dialog(self):
         vbox = qt.QVBoxLayout()
         vbox.setMargin(15)
-        if self.logo!=u'':
+        if self.logo:
             label = qt.QLabel()
             label.setPixmap(qt.QPixmap(self.logo))
             label.setAlignment(qc.Qt.AlignHCenter)
             vbox.addWidget(label, qc.Qt.AlignHCenter)
-        if self.name!=u'' or self.version!=u'':
-            label = qt.QLabel(u'<span style="font-weight:bold;font-size:x-large;">%s %s</span>'\
-                                                %(self.name, self.version))
-            label.setTextInteractionFlags(qc.Qt.TextSelectableByMouse
-                                                                        | qc.Qt.TextSelectableByKeyboard)
+        if self.name or self.version:
+            label = qt.QLabel(u'<span style="font-weight:bold;font-size:x-large;">%s %s</span>'%(self.name, self.version))
+            label.setTextInteractionFlags(qc.Qt.TextSelectableByMouse | qc.Qt.TextSelectableByKeyboard)
             label.setAlignment(qc.Qt.AlignHCenter)
             label.setLayoutDirection(qc.Qt.LeftToRight)
             vbox.addWidget(label, qc.Qt.AlignHCenter)
-        if self.comments!=u'':
+        if self.comments:
             label = qt.QLabel(self.comments)
-            label.setTextInteractionFlags(qc.Qt.TextSelectableByMouse
-                                                                        | qc.Qt.TextSelectableByKeyboard)
+            label.setTextInteractionFlags(qc.Qt.TextSelectableByMouse | qc.Qt.TextSelectableByKeyboard)
             label.setAlignment(qc.Qt.AlignHCenter)
             vbox.addWidget(label, qc.Qt.AlignHCenter)
-        if self.website!='':
+        if self.website:
             label = qt.QLabel('<a href="%s">%s</a>'%(self.website,self.website))
-            label.setTextInteractionFlags(qc.Qt.LinksAccessibleByMouse
-                                                                        | qc.Qt.LinksAccessibleByKeyboard)
+            label.setTextInteractionFlags(qc.Qt.LinksAccessibleByMouse | qc.Qt.LinksAccessibleByKeyboard)
             label.setAlignment(qc.Qt.AlignHCenter)
             label.setLayoutDirection(qc.Qt.LeftToRight)
             self.connect(label, qc.SIGNAL('linkActivated(const QString&)'), myUrlShow)
@@ -609,7 +605,7 @@ class AboutDialog(qt.QWidget):
             creditsBtn = qt.QPushButton(_('C_redits'))
             self.connect(creditsBtn, qc.SIGNAL('clicked()'), lambda: self.winCred.show())
             bbox.addWidget(creditsBtn)
-        if self.license!='':
+        if self.license:
             win = qt.QDialog(self)
             self.winLic = win
             tb = qt.QTextBrowser(win)
@@ -627,8 +623,8 @@ class AboutDialog(qt.QWidget):
             bboxWin.addWidget(closeBtn)
             vboxWin.addLayout(bboxWin)
             win.setLayout(vboxWin)
-            w = tb.fontMetrics().maxWidth()
-            win.resize(w*50, w*40)
+            met = tb.fontMetrics()
+            win.resize(met.averageCharWidth()*60, met.height()*20)
             ###############
             licenseBtn = qt.QPushButton(_('_License'))
             self.connect(licenseBtn, qc.SIGNAL('clicked()'), lambda: self.winLic.show())
@@ -776,14 +772,18 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
             self.wgroup[i-1].append(sep)
             self.wgroup[i].append(sep) ##??????????
             #if i==1: self.vsep0 = sep
-            #############################
+            ###############
             label = IntLabel(mode)
             self.yearLabel[i] = label
             label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
             self.connect(label, qc.SIGNAL('changed'), self.yearLabelChange)
             self.addWidget(label)
             self.wgroup[i].append(label)
-            #############################
+            ###############
+            label = qt.QLabel('')
+            label.setFixedWidth(5)
+            self.addWidget(label)
+            ###############
             label = MonthLabel(mode)
             self.monthLabel[i] = label
             label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
@@ -851,10 +851,8 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
     def updateArrows(self):
         if showYmArrows:
             if isinstance(preferences.prevStock, str):
-                self.arrowPY.set_image(gtk.image_new_from_stock(preferences.prevStock,
-                                                            gtk.ICON_SIZE_SMALL_TOOLBAR))
-                self.arrowPM.set_image(gtk.image_new_from_stock(preferences.prevStock,
-                                                             gtk.ICON_SIZE_SMALL_TOOLBAR))
+                self.arrowPY.set_image(gtk.image_new_from_stock(preferences.prevStock, gtk.ICON_SIZE_SMALL_TOOLBAR))
+                self.arrowPM.set_image(gtk.image_new_from_stock(preferences.prevStock, gtk.ICON_SIZE_SMALL_TOOLBAR))
             elif isinstance(preferences.prevStock, gtk._gtk.ArrowType):
                 if self.arrowPY.child!=None:
                     self.arrowPY.remove(self.arrowPY.child)
@@ -869,10 +867,8 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
                 arrow.show()
             #################
             if isinstance(preferences.nextStock, str):
-                self.arrowNY.set_image(gtk.image_new_from_stock(preferences.nextStock,
-                                                            gtk.ICON_SIZE_SMALL_TOOLBAR))
-                self.arrowNM.set_image(gtk.image_new_from_stock(preferences.nextStock,
-                                                             gtk.ICON_SIZE_SMALL_TOOLBAR))
+                self.arrowNY.set_image(gtk.image_new_from_stock(preferences.nextStock, gtk.ICON_SIZE_SMALL_TOOLBAR))
+                self.arrowNM.set_image(gtk.image_new_from_stock(preferences.nextStock, gtk.ICON_SIZE_SMALL_TOOLBAR))
             elif isinstance(preferences.nextStock, gtk._gtk.ArrowType):
                 if self.arrowNY.child!=None:
                     self.arrowNY.remove(self.arrowNY.child)
@@ -1751,10 +1747,6 @@ class MainWin(qt.QMainWindow):
         self.closeEvent(None)
     def quit(self, widget=None, event=None):
         ui.saveLiveConf()
-        if self.trayMode==2:
-            self.sysTray.setVisible(False) ## needed for windows ## before or after main_quit ?
-        print 'Exiting...'
-        #self.destroy()
         qc.QCoreApplication.quit()
     def adjustTime(self, widget=None, event=None):
         os.popen2(preferences.adjustTimeCmd) ## Replace with subprocess
