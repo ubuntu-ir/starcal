@@ -186,11 +186,14 @@ class ArrowToolButton(qt.QToolButton):
         self.setArrowType(arrowType)
     def event(self, ev):
         t = ev.type()
+        if t==100:## exiting ## 100==qc.QEvent.StyleChange
+            return True ## FIXME
         if t in (qc.QEvent.HoverEnter, qc.QEvent.GraphicsSceneHoverEnter):
             self.emit(qc.SIGNAL('mouseEnter'))
         elif t in (qc.QEvent.HoverLeave, qc.QEvent.GraphicsSceneHoverLeave):
             self.emit(qc.SIGNAL('mouseLeave'))
         return qt.QToolButton.event(self, ev)
+        
 
 class IntLabel(qt.QLabel):## label_id is the same calendar mode for a year label
     itemsNum = 9
@@ -1635,28 +1638,29 @@ class MainWin(qt.QMainWindow):
         y = r.y()
         w = r.width()
         h = r.height()
-        if y+h > screenH - 100:## taskbar is on buttom(below)
+        if y+h > screenH - 100:## taskbar is at the bottom screen
             menu = self.menuTray2
             menuW = self.menuTray2Width
             menuH = self.menuTray2Height
-        else:## taskbar is on top
+        else:## taskbar is at the top of screen
             menu = self.menuTray1
             menuW = self.menuTray1Width
             menuH = self.menuTray1Height
-        if y == 0:# top
+        eps = 15
+        if y < eps:# top
             mx = x+w-menuW if rtl else x
             my = y+h
-        elif y+h == screenH:# buttom
+        elif y+h > screenH-eps:# buttom
             mx = x+w-menuW if rtl else x
             my = y-menuH
-        elif x == 0:# left
+        elif x < eps:# left
             mx = x+w
             my = y
-        elif x+w == screenW:## right
+        elif x+w > screenW-eps:## right
             mx = x-menuW
             my = y
         else:
-            print 'trayPopup', x, y, x+w, y+h
+            #print 'trayPopup: x=%s, x+w=%s, screenW=%s    y=%s, y+h=%s, screenH=%s'%(x, x+w, screenW, y, y+h, screenH)
             mx = x
             my = y
         menu.popup(qc.QPoint(mx, my))
@@ -1750,7 +1754,7 @@ class MainWin(qt.QMainWindow):
         if self.trayMode==2:
             self.sysTray.setVisible(False) ## needed for windows ## before or after main_quit ?
         print 'Exiting...'
-        self.destroy()
+        #self.destroy()
         qc.QCoreApplication.quit()
     def adjustTime(self, widget=None, event=None):
         os.popen2(preferences.adjustTimeCmd) ## Replace with subprocess
@@ -1811,9 +1815,9 @@ if __name__ == '__main__':## ?????????????
             else:
                 main = MainWin(trayMode=2)
                 if sys.argv[1]=='--hide':
-                    show=False
+                    show = False
                 elif sys.argv[1]=='--show':
-                    show=True
+                    show = True
                 elif sys.argv[1]=='--no-tray-check':
                     show = ui.showMain
                 #elif sys.argv[1]=='--html':#????????????
