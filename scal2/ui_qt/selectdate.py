@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #        
-# Copyright (C) 2009 Saeed Rasooli <saeed.gnu@gmail.com> (ilius)
+# Copyright (C) 2009-2011 Saeed Rasooli <saeed.gnu@gmail.com> (ilius)
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -123,32 +123,31 @@ class SelectDateDialog(qt.QWidget):
         hbox.addWidget(spin)
         self.spinD = spin
         wlist.append(spin)
-        
+        ###
         self.vbox.addLayout(hbox)
         self.wlist1 = wlist
- 
         ########
         hbox = qt.QHBoxLayout()
         wlist = []
-
+        ###
         radio = qt.QRadioButton('', self)
         radio.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
         hbox.addWidget(radio)
         self.connect(radio, qc.SIGNAL('clicked()'), self.radioChanged)
         self.radio2 = radio
-     
+        ###
         label = newFixedLabel('yyyy/mm/dd')
         hbox.addWidget(label)
         wlist.append(label)
-        
-        dbox = DateBox() # hist_size=16
-        ##self.connect(dbox, qc.SIGNAL('editingFinished()'), self.ok)
-        hbox.addWidget(dbox)
-        wlist.append(dbox)
-        self.dbox = dbox
-        
+        ###
+        dateInput = DateBox() # hist_size=16
+        ##self.connect(dateInput, qc.SIGNAL('editingFinished()'), self.ok)
+        hbox.addWidget(dateInput)
+        wlist.append(dateInput)
+        self.dateInput = dateInput
+        ###
         hbox.addStretch()
-        
+        ###
         self.vbox.addLayout(hbox)
         self.wlist2 = wlist
         #######
@@ -185,8 +184,8 @@ class SelectDateDialog(qt.QWidget):
         self.spinY.setValue(y)
         self.comboMonth.setCurrentIndex(m-1)
         self.spinD.setValue(d)
-        self.dbox.setDate(y, m, d)
-        #self.dbox.addHistory()
+        self.dateInput.setDate(y, m, d)
+        #self.dateInput.addHistory()
         return True
     def show(self):
         ## Show a window that ask the date and set on the calendar
@@ -202,8 +201,8 @@ class SelectDateDialog(qt.QWidget):
         self.spinY.setValue(y)
         self.comboMonth.setCurrentIndex(m-1)
         self.spinD.setValue(d)
-        self.dbox.setDate(y, m, d)
-        #self.dbox.addHistory()
+        self.dateInput.setDate(y, m, d)
+        #self.dateInput.addHistory()
     def setMode(self, mode):
         self.mode = mode
         module = core.modules[mode]
@@ -213,7 +212,7 @@ class SelectDateDialog(qt.QWidget):
             combo.addItem(_(module.getMonthName(i+1)))
         self.comboMode.setCurrentIndex(mode)
         self.spinD.setRange(1, core.modules[mode].maxMonthLen)
-        self.dbox.maxs = (9999, 12, module.maxMonthLen)
+        self.dateInput.maxs = (9999, 12, module.maxMonthLen)
     def comboModeChanged(self, mode):
         #print 'comboModeChanged, index="%s"'%index
         pMode = self.mode
@@ -231,7 +230,7 @@ class SelectDateDialog(qt.QWidget):
             combo.addItem(_(module.getMonthName(i+1, y)))
         self.connect(combo, qc.SIGNAL('currentIndexChanged(int)'), self.comboMonthChanged)
         self.spinD.setRange(1, module.maxMonthLen)
-        self.dbox.maxs = (9999, 12, module.maxMonthLen)
+        self.dateInput.maxs = (9999, 12, module.maxMonthLen)
         self.set(y, m, d)
         self.mode = mode
     def comboMonthChanged(self, index=None):
@@ -248,7 +247,7 @@ class SelectDateDialog(qt.QWidget):
             d0 = int(self.spinD.value())
             return (y0, m0, d0)
         else:#elif self.radio2.isChecked():
-            return self.dbox.getDate()
+            return self.dateInput.getDate()
         #else:
         #    return None
     def ok(self):
@@ -268,8 +267,8 @@ class SelectDateDialog(qt.QWidget):
             return
         self.emit(qc.SIGNAL('response-date'), y, m, d)
         self.hide()
-        #self.dbox.addHistory((y0, m0, d0))
-        ##self.dbox.addHistory((y, m, d))
+        #self.dateInput.addHistory((y0, m0, d0))
+        ##self.dateInput.addHistory((y, m, d))
     def radioChanged(self, widget=None):
         if self.radio1.isChecked():
             for w in self.wlist1:

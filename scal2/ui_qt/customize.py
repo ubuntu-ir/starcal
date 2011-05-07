@@ -145,11 +145,11 @@ class CustomizeDialog(qt.QWidget):## QDialog
         self.vbox.addLayout(self.optionBox)
         ########
         bbox = qt.QDialogButtonBox(self)
-        okB = bbox.addButton(qt.QDialogButtonBox.Ok)
-        """if ui_main.autoLocale:
-          okB.setText(_('_OK'))
-        """## ???????????????
-        self.connect(okB, qc.SIGNAL('clicked()'), self.closeEvent)
+        closeB = bbox.addButton(qt.QDialogButtonBox.Close)
+        if ui.autoLocale:
+            closeB.setText(_('_Close'))
+        ## ???????????????
+        self.connect(closeB, qc.SIGNAL('clicked()'), self.closeEvent)
         self.vbox.addWidget(bbox)
     def itemChanged(self, qItem, column_index):## enableCellToggled
         (index, parentIndex) = self.getSelectedIndex()

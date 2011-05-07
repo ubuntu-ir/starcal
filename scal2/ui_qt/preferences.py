@@ -980,18 +980,22 @@ class PluginTreeview(qt.QTreeWidget):
         ###########################################
         dialog = qt.QDialog(self)
         dialog.setWindowTitle(_('Add Plugin'))
-        buttonBox = qt.QDialogButtonBox(qt.QDialogButtonBox.Cancel
-                                                        | qt.QDialogButtonBox.Ok, qc.Qt.Horizontal, dialog)
+        buttonBox = qt.QDialogButtonBox(
+            qt.QDialogButtonBox.Cancel | qt.QDialogButtonBox.Ok,
+            qc.Qt.Horizontal,
+            dialog
+        )
         self.connect(dialog, qc.SIGNAL('rejected()'), self.addDialogClose)
         self.connect(dialog, qc.SIGNAL('accepted()'), self.addDialogOK)
         self.connect(buttonBox, qc.SIGNAL('rejected()'), self.addDialogClose)
         self.connect(buttonBox, qc.SIGNAL('accepted()'), self.addDialogOK)
-        """
+        '''
         if ui.autoLocale:
-            okB.set_label(_('_OK'))
-            okB.set_image(gtk.image_new_from_stock(STOCK_OK,gtk.ICON_SIZE_BUTTON))
-            canB.set_label(_('_Cancel'))
-            canB.set_image(gtk.image_new_from_stock(STOCK_CANCEL,gtk.ICON_SIZE_BUTTON))"""
+            okB.setText(_('_OK'))
+            #okB.setIcon(qt.QIcon('ok.png'))
+            canB.setText(_('_Cancel'))
+            #canB.setIcon(qt.QIcon('cancel.png'))
+        '''
         treev = qt.QTreeWidget()
         treev.setColumnCount(1)
         treev.setHeaderLabels([_('Description')])
@@ -1264,14 +1268,16 @@ class PrefDialog(qt.QWidget):
         cancelB = bbox.addButton(qt.QDialogButtonBox.Cancel)
         applyB = bbox.addButton(qt.QDialogButtonBox.Apply)
         okB = bbox.addButton(qt.QDialogButtonBox.Ok)
-        """if ui.autoLocale:
+        if ui.autoLocale:
             cancelB.setText(_('_Cancel'))
-            cancelB.set_image(gtk.image_new_from_stock(STOCK_CANCEL,gtk.ICON_SIZE_BUTTON))
+            #cancelB.setIcon(qt.QIcon('cancel.png'))
             applyB.setText(_('_Apply'))
-            applyB.set_image(gtk.image_new_from_stock(STOCK_APPLY,gtk.ICON_SIZE_BUTTON))
+            #applyB.setIcon(qt.QIcon('apply.png'))
             okB.setText(_('_OK'))
-            okB.grab_default()#?????????
-            #okB.grab_focus()#?????????"""## ???????????????
+            #okB.setIcon(qt.QIcon('ok.png'))
+            #okB.grab_default()#?????????
+            #okB.grab_focus()#?????????
+        ## ???????????????
         self.connect(cancelB, qc.SIGNAL('clicked()'), self.cancel)
         self.connect(applyB, qc.SIGNAL('clicked()'), self.apply)
         self.connect(okB, qc.SIGNAL('clicked()'), self.ok)
@@ -1287,21 +1293,21 @@ class PrefDialog(qt.QWidget):
         ################################ Tab 1 ############################################
         vbox = qt.QVBoxLayout()
         vbox.setMargin(0)
-        hb = qt.QHBoxLayout()
-        hb.setMargin(0)
-        hb.addWidget(newFixedLabel(_('Language')))
+        hbox = qt.QHBoxLayout()
+        hbox.setMargin(0)
+        hbox.addWidget(newFixedLabel(_('Language')))
         itemLang = LangPrefItem()
         self.localePrefItems.append(itemLang)
         ###
-        hb.addWidget(itemLang.widget)
+        hbox.addWidget(itemLang.widget)
         if core.langSh=='en':
-            hb.addStretch()
+            hbox.addStretch()
         else:
             label = qt.QLabel('Language')
             label.setSizePolicy(qt.QSizePolicy.Minimum, qt.QSizePolicy.Fixed)
-            hb.addWidget(label)
-            #hb.addStretch()
-        vbox.addLayout(hb)
+            hbox.addWidget(label)
+            #hbox.addStretch()
+        vbox.addLayout(hbox)
         ##########################
         #exp = Expander(_('Shown Calendars'), 2, self)
         itemShownCals = CalPropPrefItem(ui, 'shownCals')
@@ -1312,11 +1318,11 @@ class PrefDialog(qt.QWidget):
         vbox.addWidget(itemShownCals.widget)
         ##########################
         if trayMode!=1:
-            #hb = qt.QHBoxLayout()
-            #hb.setMargin(0)
+            #hbox = qt.QHBoxLayout()
+            #hbox.setMargin(0)
             item = CheckStartupPrefItem()
             self.uiPrefItems.append(item)
-            #hb.addWidget(item.widget)
+            #hbox.addWidget(item.widget)
             #vbox.addLayout(hb)
             vbox.addWidget(item.widget)
             ########################
