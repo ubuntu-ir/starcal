@@ -783,6 +783,7 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
             label = qt.QLabel('')
             label.setFixedWidth(5)
             self.addWidget(label)
+            self.wgroup[i].append(label)
             ###############
             label = MonthLabel(mode)
             self.monthLabel[i] = label
