@@ -1685,7 +1685,7 @@ class MainWin(qt.QMainWindow):
             h = pixmap.height()
             s = ui.traySize
             if ui.trayY0==None:
-                y = s/4+int((0.9*s-h)/2)
+                y = s/4+int((0.9*s-h)/2) +5
             else:
                 y = ui.trayY0
             painter.drawText(0, y, w, h-y, qc.Qt.AlignCenter, numLocale(ddate[2]))
