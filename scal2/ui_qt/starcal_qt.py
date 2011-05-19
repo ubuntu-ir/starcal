@@ -60,6 +60,7 @@ from scal2.ui_qt.monthcal import MonthCal, qfontEncode
 #gettext.textdomain(core.APP_NAME)
 
 core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
+ui.uiName = 'gtk'
 
 def liveConfChanged():
     tm = time()
@@ -1789,51 +1790,50 @@ class MainWin(qt.QMainWindow):
 ## gtk.link_button_set_uri_hook(clickWebsite) ?????????????
 
 ## Maybe this file be imported from plasma applet file
-if __name__ == '__main__':## ?????????????
-        '''
-        try:
-            import psyco
-        except ImportError:
-            print('Warning: module "psyco" not found. It could speed up execution.')
-            psyco_found=False
-        else:
-            psyco.full()
-            print('Using module "psyco" to speed up execution.')
-            psyco_found=True'''
-        trayMode=2
-        if len(sys.argv)>1:
-            if sys.argv[1]=='--no-tray': ## to tray icon
-                main = MainWin(trayMode=0)
-                show = True
-            else:
-                main = MainWin(trayMode=2)
-                if sys.argv[1]=='--hide':
-                    show = False
-                elif sys.argv[1]=='--show':
-                    show = True
-                elif sys.argv[1]=='--no-tray-check':
-                    show = ui.showMain
-                #elif sys.argv[1]=='--html':#????????????
-                #    main.exportHtml('calendar.html') ## exportHtml(path, months, title)
-                #    sys.exit(0)
-                #else:
-                    #while gtk.events_pending():## if do not this, main.sicon.is_embedded returns False
-                    #    gtk.main_iteration_do(False)
-                    #show = ui.showMain or not main.sicon.is_embedded()
+def main():
+    '''
+    try:
+        import psyco
+    except ImportError:
+        print('Warning: module "psyco" not found. It could speed up execution.')
+        psyco_found=False
+    else:
+        psyco.full()
+        print('Using module "psyco" to speed up execution.')
+        psyco_found=True'''
+    trayMode=2
+    if len(sys.argv)>1:
+        if sys.argv[1]=='--no-tray': ## to tray icon
+            main = MainWin(trayMode=0)
+            show = True
         else:
             main = MainWin(trayMode=2)
-            #while gtk.events_pending():## if do not this, main.sicon.is_embedded returns False
-            #    gtk.main_iteration_do(False)
-            #show = ui.showMain or main.sicon==None or not main.sicon.isVisible()
-            show = True
-        if show:
-            #main.raise_() ## ~= gtk.Window.show(self)
-            main.show(True)
-        ##rootWindow.set_cursor(gdk.Cursor(gdk.LEFT_PTR))#???????????
-        sys.exit(app.exec_())
+            if sys.argv[1]=='--hide':
+                show = False
+            elif sys.argv[1]=='--show':
+                show = True
+            elif sys.argv[1]=='--no-tray-check':
+                show = ui.showMain
+            #elif sys.argv[1]=='--html':#????????????
+            #    main.exportHtml('calendar.html') ## exportHtml(path, months, title)
+            #    sys.exit(0)
+            #else:
+                #while gtk.events_pending():## if do not this, main.sicon.is_embedded returns False
+                #    gtk.main_iteration_do(False)
+                #show = ui.showMain or not main.sicon.is_embedded()
+    else:
+        main = MainWin(trayMode=2)
+        #while gtk.events_pending():## if do not this, main.sicon.is_embedded returns False
+        #    gtk.main_iteration_do(False)
+        #show = ui.showMain or main.sicon==None or not main.sicon.isVisible()
+        show = True
+    if show:
+        #main.raise_() ## ~= gtk.Window.show(self)
+        main.show(True)
+    ##rootWindow.set_cursor(gdk.Cursor(gdk.LEFT_PTR))#???????????
+    return app.exec_()
 
 
-
-
-
+if __name__ == '__main__':
+    sys.exit(main())
 
