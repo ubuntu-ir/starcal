@@ -651,15 +651,16 @@ Exec="%s" --no-tray-check'''%(core.VERSION, core.COMMAND)
             return True
     def updateVar(self):
         if self.get():
-            if not self.addStartup(ui.comDesk):
+            if not ui.addStartup():
                 self.set(False)
         else:
             try:
-                os.remove(ui.comDesk)
+                ui.removeStartup()
             except:
                 pass
     def updateWidget(self):
-        self.set(os.path.isfile(ui.comDesk))
+        self.set(ui.checkStartup())
+
 
 ## http://qt.nokia.com/products/appdev/add-on-products/catalog/4/Widgets/qtcolorpicker/
 class ColorPrefItem(PrefItem):
@@ -831,10 +832,10 @@ class CalPropPrefItem(PrefItem):
         for i in xrange(self.num):
             result.append({
                 'enable':self.checkb[i].checkState()==qc.Qt.Checked,
-                'mode'    :self.combo[i].currentIndex(),
-                'x'         :self.spinX[i].value(),
-                'y'         :self.spinY[i].value(),
-                'font'    :qfontDecode(self.fontb[i].getFont()),
+                'mode'  :self.combo[i].currentIndex(),
+                'x'     :self.spinX[i].value(),
+                'y'     :self.spinY[i].value(),
+                'font'  :qfontDecode(self.fontb[i].getFont()),
                 'color' :self.colorb[i].getColor()
             })
         return result
@@ -922,16 +923,14 @@ class PluginTreeview(qt.QTreeWidget):
         buttonHBox = qt.QHBoxLayout() ## or QDialogButtonBox ?????????
         buttonHBox.setMargin(0)
         ###
-        button = qt.QPushButton(self.style().standardIcon(qt.QStyle.SP_DialogHelpButton),
-                                                        _('_About Plugin'), self)
+        button = qt.QPushButton(self.style().standardIcon(qt.QStyle.SP_DialogHelpButton), _('_About Plugin'), self)
         button.setEnabled(False)
         self.connect(button, qc.SIGNAL('clicked()'), self.about)
         self.plugButtonAbout = button
         buttonHBox.addWidget(button)
         buttonHBox.addStretch()
         ###
-        button = qt.QPushButton(qt.QIcon(pixDir+'preferences-other.png'),
-                                                        _('C_onfigure Plugin'), self)
+        button = qt.QPushButton(qt.QIcon(pixDir+'preferences-other.png'), _('C_onfigure Plugin'), self)
         button.setEnabled(False)
         self.connect(button, qc.SIGNAL('clicked()'), self.conf)
         self.plugButtonConf = button
@@ -999,8 +998,7 @@ class PluginTreeview(qt.QTreeWidget):
         treev = qt.QTreeWidget()
         treev.setColumnCount(1)
         treev.setHeaderLabels([_('Description')])
-        self.connect(treev, qc.SIGNAL('activated(const QModelIndex&)'),
-                                 self.addTreevActivate)
+        self.connect(treev, qc.SIGNAL('activated(const QModelIndex&)'), self.addTreevActivate)
         ####
         vboxAddPlug = qt.QVBoxLayout()
         vboxAddPlug.setMargin(0)
@@ -1152,8 +1150,12 @@ class PluginTreeview(qt.QTreeWidget):
             pos = self.topLevelItemCount()
         else:
             pos = selected[0].row() + 1
-        item = qt.QTreeWidgetItem([str(pos),'','',
-                                   core.allPlugList[j].desc.decode('utf-8')])
+        item = qt.QTreeWidgetItem([
+            str(pos),
+            '',
+            '',
+            core.allPlugList[j].desc.decode('utf-8')
+        ])
         item.setCheckState(1, qc.Qt.Checked)
         item.setCheckState(2, qc.Qt.Unchecked)
         self.insertTopLevelItem(pos, item)
@@ -1189,8 +1191,7 @@ class PluginTreeview(qt.QTreeWidget):
                     core.plugIndex.index(i)
                 except ValueError:
                     self.plugAddItems.append(i)
-                    treev.addTopLevelItem(qt.QTreeWidgetItem(
-                        [core.allPlugList[i].desc.decode('utf-8')]))
+                    treev.addTopLevelItem(qt.QTreeWidgetItem([core.allPlugList[i].desc.decode('utf-8')]))
                     self.actionAdd.setEnabled(True)
     def startDrag(self, dropActions):
         try:
