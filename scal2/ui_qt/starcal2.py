@@ -18,14 +18,27 @@
 # Also avalable in /usr/share/common-licenses/GPL on Debian systems
 # or /usr/share/licenses/common/GPL3/license.txt on ArchLinux
 
+import sys
+
+if sys.version_info[0] != 2:
+    print 'Run this script with Python 2.x'
+    sys.exit(1)
+
+import os
+from os.path import join, dirname, isfile, isdir
 from time import time, localtime
-import os, sys
-from os.path import join, isfile
 from subprocess import Popen
 
+sys.path.insert(0, dirname(dirname(dirname(__file__))))
 from scal2.paths import *
-from scal2 import core
 
+if not isdir(confDir):
+    try:
+        __import__('scal2.ui_qt.config_importer')
+    except:
+        myRaise()
+
+from scal2 import core
 from scal2.locale_man import rtl, lang, loadTranslator ## import scal2.locale_man after core
 _ = loadTranslator(True)## FIXME
 #from scal2.locale_man import tr as _
@@ -60,7 +73,7 @@ from scal2.ui_qt.monthcal import MonthCal, qfontEncode
 #gettext.textdomain(core.APP_NAME)
 
 core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
-ui.uiName = 'gtk'
+ui.uiName = 'qt'
 
 def liveConfChanged():
     tm = time()
@@ -465,13 +478,14 @@ class WinController(qt.QWidget):
                 hbox.addWidget(button)
         self.setLayout(hbox)
     def event(self, ev):
-        t = ev.type()
-        if t==qc.QEvent.WindowActivate:
-            for b in self.buttons:
-                b.setNorm()
-        elif t==qc.QEvent.WindowDeactivate:
-            for b in self.buttons:
-                b.setInactive()
+        if hasattr(self, 'buttons'):
+            t = ev.type()
+            if t==qc.QEvent.WindowActivate:
+                for b in self.buttons:
+                    b.setNorm()
+            elif t==qc.QEvent.WindowDeactivate:
+                for b in self.buttons:
+                    b.setInactive()
         return qt.QWidget.event(self, ev)
 
 
@@ -1708,6 +1722,7 @@ class MainWin(qt.QMainWindow):
                 text = ui.todayCell.extraday
                 if text:
                     tt += '\n\n%s'%text.replace('\t', '\n').decode('utf8') #????????????
+            tt = '<div dir="rtl">%s</div>'%tt
             self.sysTray.setToolTip(tt)
             self.sysTray.setVisible(True)
         return True
@@ -1732,7 +1747,7 @@ class MainWin(qt.QMainWindow):
             #self.raise_()
             self.show()## does not work!
     def closeEvent(self, event):
-        print '--------------- MainWin.closeEvent'
+        #print '--------------- MainWin.closeEvent'
         p = self.pos()
         ui.winX = p.x()
         ui.winY = p.y()
@@ -1818,22 +1833,22 @@ def main():
             #    main.exportHtml('calendar.html') ## exportHtml(path, months, title)
             #    sys.exit(0)
             #else:
-                #while gtk.events_pending():## if do not this, main.sicon.is_embedded returns False
+                #while gtk.events_pending():## if do not this, main.sysTray.is_embedded returns False
                 #    gtk.main_iteration_do(False)
-                #show = ui.showMain or not main.sicon.is_embedded()
+                #show = ui.showMain or not main.sysTray.is_embedded()
     else:
         main = MainWin(trayMode=2)
-        #while gtk.events_pending():## if do not this, main.sicon.is_embedded returns False
+        #while gtk.events_pending():## if do not this, main.sysTray.is_embedded returns False
         #    gtk.main_iteration_do(False)
-        #show = ui.showMain or main.sicon==None or not main.sicon.isVisible()
-        show = True
-    if show:
-        #main.raise_() ## ~= gtk.Window.show(self)
-        main.show(True)
+        show = ui.showMain or main.sysTray==None ## or not main.sysTray.isVisible()
+        #print 'sysTray.isVisible = %s'%main.sysTray.isVisible()
+    main.show(True) ## main.raise_() ## ~= gtk.Window.show(self)
+    if not show:
+        main.hide()
     ##rootWindow.set_cursor(gdk.Cursor(gdk.LEFT_PTR))#???????????
     return app.exec_()
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+## if __name__ == '__main__':
+sys.exit(main())
 
