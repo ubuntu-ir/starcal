@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 ##
 ##    Copyright (C) 2010 Saeed Rasooli <saeed.gnu@gmail.com> (ilius)
@@ -113,12 +112,12 @@ def accepted():
                     shutil.copy(src_path, dst_path)
         else:
             open(join(confDir, 'locale.conf'), 'w').write('lang=%r'%langCode)
-    sys.exit(0)
+    win.close()
 
 bbox = qt.QDialogButtonBox(win)
 canB = bbox.addButton(qt.QDialogButtonBox.Cancel)
 okB = bbox.addButton(qt.QDialogButtonBox.Ok)
-win.connect(bbox, qc.SIGNAL('rejected()'), lambda: sys.exit(0))
+win.connect(bbox, qc.SIGNAL('rejected()'), lambda: win.close())
 win.connect(bbox, qc.SIGNAL('accepted()'), accepted)
 '''
 okB.set_label(_('_OK'))

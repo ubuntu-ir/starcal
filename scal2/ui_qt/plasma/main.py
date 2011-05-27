@@ -34,7 +34,7 @@ sys.argv = [__file__]
 sys.path.insert(0, rootDir)
 
 
-from scal2.ui_qt.starcal_qt import * ## before import tr as _
+from scal2.ui_qt.starcal2 import * ## before import tr as _
 
 from scal2.locale_man import rtl
 from scal2.locale_man import tr as _
