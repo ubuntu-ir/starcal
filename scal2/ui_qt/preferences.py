@@ -51,10 +51,7 @@ qpixDir = join(rootDir, 'pixmaps_qt')
 QVar = qc.QVariant
 
 
-def restart(main):
-    main.quit()
-    os.popen2('sleep 0.1; export LANG=""; %s'%sys.argv[0]) ## sleep time ????????
-    sys.exit(0)
+
 
 
 qfontDecode = lambda qfont: (str(qfont.family()), qfont.bold(), qfont.italic(),

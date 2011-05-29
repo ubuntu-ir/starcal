@@ -68,6 +68,33 @@ from scal2.ui_qt.customize import CustomizableWidgetWrapper, MainWinItem, Custom
 from scal2.ui_qt.monthcal import MonthCal, qfontEncode
 
 
+from scal2 import unity
+if unity.needToAdd():
+    dialog = qt.QDialog()
+    dialog.setWindowTitle('Tray Icon')
+    vboxL = qt.QVBoxLayout()
+    vboxL.setMargin(0)
+    dialog.setLayout(vboxL)
+    label = qt.QLabel(_(unity.addAndRestartText))
+    label.setWordWrap(True)
+    vboxL.addWidget(label)
+    ###
+    bbox = qt.QDialogButtonBox(dialog)
+    okB = bbox.addButton(qt.QDialogButtonBox.Ok)
+    cancelB = bbox.addButton(qt.QDialogButtonBox.Cancel)
+    if ui.autoLocale:
+        okB.setText(_('_OK'))
+        #okB.set_image(gtk.image_new_from_stock(gtk.STOCK_OK, gtk.ICON_SIZE_BUTTON))
+        cancelB.setText(_('_Cancel'))
+        #cancelB.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON))
+    dialog.connect(bbox, qc.SIGNAL('rejected()'), lambda: dialog.reject())
+    dialog.connect(bbox, qc.SIGNAL('accepted()'), lambda: dialog.accept())
+    vboxL.addWidget(bbox)
+    ###
+    if dialog.exec_()==qt.QDialog.Accepted:
+        unity.addAndRestart()
+    dialog.destroy()
+
 #os.environ['LANG'] = core.lang
 #import gettext
 #gettext.textdomain(core.APP_NAME)
@@ -1187,7 +1214,7 @@ class MainWin(qt.QMainWindow):
         self.mcal = MonthCal(parent=self)
         self.connect(self.mcal, qc.SIGNAL('popup-menu-cell'), self.popupMenuCell)
         self.connect(self.mcal, qc.SIGNAL('popup-menu-main'), self.popupMenuMain)
-        self.connect(self.mcal, qc.SIGNAL('2button-press'), self.dayOpenEvolution)
+        self.connect(self.mcal, qc.SIGNAL('2button-press'), ui.dayOpenEvolution)
         self.connect(self.mcal, qc.SIGNAL('pref-update-bg-color'), self.prefUpdateBgColor)
         ##################################################################
         ################## Making Actions ########################
@@ -1260,6 +1287,7 @@ class MainWin(qt.QMainWindow):
         self.vbox.addWidget(nullWidget)
         #self.customizeDialog.widget.setSizePolicy(qt.QSizePolicy.Minimum, qt.QSizePolicy.Minimum)
         #self.vbox.setSizePolicy(qt.QSizePolicy.Minimum, qt.QSizePolicy.Minimum)
+        self.vbox.show()
         ####################
         #self.setMinHeight()
         ############
@@ -1341,9 +1369,9 @@ class MainWin(qt.QMainWindow):
         menu.addAction(actionsDict['today'])
         menu.addAction(actionsDict['date'])
         if isfile('/usr/bin/evolution'):##??????????????????
-            menu.addAction(qt.QIcon('%s/evolution-18.png'%pixDir), _('In E_volution'), self.dayOpenEvolution)
+            menu.addAction(qt.QIcon('%s/evolution-18.png'%pixDir), _('In E_volution'), ui.dayOpenEvolution)
         #if isfile('/usr/bin/sunbird'):##??????????????????
-        #    menu.addAction(qt.QIcon('%s/sunbird-18.png'%pixDir), _('In E_volution'), self.dayOpenSunbird)
+        #    menu.addAction(qt.QIcon('%s/sunbird-18.png'%pixDir), _('In E_volution'), ui.dayOpenSunbird)
         menu.num = 1
         self.menuCell1 = menu
         self.menuCell = menu ## may be changed later frequently, here just initialized
@@ -1357,9 +1385,9 @@ class MainWin(qt.QMainWindow):
         menu.addAction(actionsDict['today'])
         menu.addAction(actionsDict['date'])
         if isfile('/usr/bin/evolution'):##??????????????????
-            menu.addAction(qt.QIcon('%s/evolution-18.png'%pixDir), _('In E_volution'), self.dayOpenEvolution)
+            menu.addAction(qt.QIcon('%s/evolution-18.png'%pixDir), _('In E_volution'), ui.dayOpenEvolution)
         #if isfile('/usr/bin/sunbird'):##??????????????????
-        #    menu.addAction(qt.QIcon('%s/sunbird-18.png'%pixDir), _('In E_volution'), self.dayOpenSunbird)
+        #    menu.addAction(qt.QIcon('%s/sunbird-18.png'%pixDir), _('In E_volution'), ui.dayOpenSunbird)
         menu.num = 2
         self.menuCell2 = menu
         ######################
@@ -1502,19 +1530,6 @@ class MainWin(qt.QMainWindow):
                 core.allPlugList[core.plugIndex[j]].date_change_after(*date)
             except AttributeError:
                 pass
-    def dayOpenEvolution(self, arg=None):
-        ##(y, m, d) = core.jd_to(ui.cell.jd-1, core.DATE_GREG) ## in gnome-cal opens prev day! why??
-        (y, m, d) = ui.cell.dates[core.DATE_GREG]
-        os.popen2('evolution calendar:///?startdate=%.4d%.2d%.2d'%(y, m, d))
-        #os.popen2('evolution calendar:///?startdate=%.4d%.2d%.2dT120000Z'%(y, m, d))
-        ## What "Time" pass to evolution? like gnome-clock: T193000Z (19:30:00) / Or ignore "Time"
-        ## evolution calendar:///?startdate=$(date +"%Y%m%dT%H%M%SZ")
-        print 'dayOpenEvolution', (y, m, d)
-    def dayOpenSunbird(self, arg=None):
-        (y, m, d) = ui.cell.dates[core.DATE_GREG]
-        os.popen2('sunbird -showdate %.4d/%.2d/%.2d'%(y, m, d))
-        print 'dayOpenSunbird', (y, m, d)
-        ## How do this with KOrginizer ????????????????????????????????
     def popupMenuCell(self, x, y):
         ui.focusTime = time()
         p = self.mcal.mapToGlobal(qc.QPoint(x, y))
@@ -1765,8 +1780,11 @@ class MainWin(qt.QMainWindow):
     def quit(self, widget=None, event=None):
         ui.saveLiveConf()
         qc.QCoreApplication.quit()
+    def restart(self):
+        self.quit()
+        ui.restart()
     def adjustTime(self, widget=None, event=None):
-        os.popen2(preferences.adjustTimeCmd) ## Replace with subprocess
+        Popen(preferences.adjustTimeCmd)
     exportClicked = lambda self: self.export.showDialog(ui.cell.year, ui.cell.month)
     def exportClickedTray(self, widget=None, event=None):
         (y, m) = core.getSysDate()[:2]
@@ -1787,6 +1805,8 @@ class MainWin(qt.QMainWindow):
         for item in self.items:
             item.onConfigChange()
         self.trayUpdate(checkDate=False)
+        #if self.sysTray:
+        #    self.sysTray.show()
         self.onDateChange()
     updateConfigLater = lambda self: qc.QTimer.singleShot(100, self.onConfigChange)
     def show(self, update_flags=False):
@@ -1819,10 +1839,10 @@ def main():
     trayMode=2
     if len(sys.argv)>1:
         if sys.argv[1]=='--no-tray': ## to tray icon
-            main = MainWin(trayMode=0)
+            mainWin = MainWin(trayMode=0)
             show = True
         else:
-            main = MainWin(trayMode=2)
+            mainWin = MainWin(trayMode=2)
             if sys.argv[1]=='--hide':
                 show = False
             elif sys.argv[1]=='--show':
@@ -1830,21 +1850,24 @@ def main():
             elif sys.argv[1]=='--no-tray-check':
                 show = ui.showMain
             #elif sys.argv[1]=='--html':#????????????
-            #    main.exportHtml('calendar.html') ## exportHtml(path, months, title)
+            #    mainWin.exportHtml('calendar.html') ## exportHtml(path, months, title)
             #    sys.exit(0)
             #else:
                 #while gtk.events_pending():## if do not this, main.sysTray.is_embedded returns False
                 #    gtk.main_iteration_do(False)
-                #show = ui.showMain or not main.sysTray.is_embedded()
+                #show = ui.showMain or not mainWin.sysTray.is_embedded()
     else:
-        main = MainWin(trayMode=2)
-        #while gtk.events_pending():## if do not this, main.sysTray.is_embedded returns False
+        mainWin = MainWin(trayMode=2)
+        #while gtk.events_pending():## if do not this, mainWin.sysTray.is_embedded returns False
         #    gtk.main_iteration_do(False)
-        show = ui.showMain or main.sysTray==None ## or not main.sysTray.isVisible()
-        #print 'sysTray.isVisible = %s'%main.sysTray.isVisible()
-    main.show(True) ## main.raise_() ## ~= gtk.Window.show(self)
+        show = ui.showMain or mainWin.sysTray==None ## or not main.sysTray.isVisible()
+        #print 'sysTray.isVisible = %s'%mainWin.sysTray.isVisible()
+    #if show:
+    #    mainWin.show()
+    mainWin.show() ## main.raise_() ## ~= gtk.Window.show(self)
     if not show:
-        main.hide()
+    #    mainWin.hide()## FIXME
+        qc.QTimer.singleShot(100, mainWin.hide)
     ##rootWindow.set_cursor(gdk.Cursor(gdk.LEFT_PTR))#???????????
     return app.exec_()
 
