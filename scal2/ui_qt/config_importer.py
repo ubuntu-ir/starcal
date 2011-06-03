@@ -20,21 +20,14 @@ import os, sys, shutil
 from os.path import dirname
 from os.path import join, isfile, isdir, exists
 
-
-from scal2.config_importer import importConfigFrom15, getOldVersion
+from scal2.paths import *
+from scal2.config_importer import importConfigFrom15, getOldVersion, langDir, langConfDir
 
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
 from scal2.ui_qt.mywidgets import HBox, VBox
 
 app = qt.QApplication(sys.argv)
-
-rootDir = dirname(dirname(dirname(__file__)))
-langDir = join(rootDir, 'lang')
-
-homeDir = os.getenv('HOME')
-confDir = join(homeDir, '.starcal2')
-pixDir = os.path.join(rootDir, 'pixmaps')
 
 
 langNameList = []
@@ -94,13 +87,13 @@ def accepted():
     else:
         i = langCombo.currentIndex()
         langCode = langCodeList[i]
-        langConfDir = join(rootDir, 'lang_config', langCode)
+        thisLangConfDir = join(langConfDir, langCode)
         #print 'Setting language', langCode
         if not os.path.isdir(confDir):
             os.mkdir(confDir, 0755)
-        if os.path.isdir(langConfDir):
-            for fname in os.listdir(langConfDir):
-                src_path = join(langConfDir, fname)
+        if os.path.isdir(thisLangConfDir):
+            for fname in os.listdir(thisLangConfDir):
+                src_path = join(thisLangConfDir, fname)
                 dst_path = join(confDir, fname)
                 if isdir(dst_path):
                     shutil.rmtree(dst_path)
