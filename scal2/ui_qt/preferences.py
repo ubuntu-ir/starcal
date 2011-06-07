@@ -30,6 +30,7 @@ from PyQt4 import QtCore as qc
 
 from scal2.locale_man import tr as _
 from scal2.locale_man import langDict
+from scal2.utils import toUnicode
 
 from scal2 import core
 from scal2.core import convert, numLocale, myRaise, rootDir, pixDir, confDir, sysConfDir
@@ -1022,7 +1023,7 @@ class PluginTreeview(qt.QTreeWidget):
         plug = core.allPlugList[j]
         if plug.about==None:
             return
-        text = plug.about.decode('utf-8') + u'\n' + _('Credits') + u':\n\t' + '\n\t'.join(plug.authors).decode('utf-8')
+        text = toUnicode(plug.about) + u'\n' + _('Credits') + u':\n\t' + toUnicode('\n\t'.join(plug.authors))
         qt.QMessageBox.about(self, _('About Plugin'), text)
         """## ??????????????????????????
         about = gtk.AboutDialog()
@@ -1046,7 +1047,7 @@ class PluginTreeview(qt.QTreeWidget):
         except:
             return
         j = int(self.topLevelItem(i).text(0))
-        plug = com.allPlugList[j]
+        plug = core.allPlugList[j]
         if not plug.has_config:
             return
         plug.open_configure()
@@ -1130,7 +1131,7 @@ class PluginTreeview(qt.QTreeWidget):
             self.takeTopLevelItem(i)
         self.plugAddItems.append(j)
         desc = core.allPlugList[j].desc
-        self.plugAddTreev.addTopLevelItem(qt.QTreeWidgetItem([desc.decode('utf-8')]))
+        self.plugAddTreev.addTopLevelItem(qt.QTreeWidgetItem([toUnicode(desc)]))
         self.actionAdd.setEnabled(True)
         if n>1:
             self.setCurrentItem(self.topLevelItem(min(n-2, i)), 0)
@@ -1151,7 +1152,7 @@ class PluginTreeview(qt.QTreeWidget):
             str(pos),
             '',
             '',
-            core.allPlugList[j].desc.decode('utf-8')
+            toUnicode(core.allPlugList[j].desc)
         ])
         item.setCheckState(1, qc.Qt.Checked)
         item.setCheckState(2, qc.Qt.Unchecked)
@@ -1167,7 +1168,7 @@ class PluginTreeview(qt.QTreeWidget):
         #self.hideColumn(0)
         for i in core.plugIndex:#????????
             plug = core.allPlugList[i]
-            item = qt.QTreeWidgetItem([str(i),'','',plug.desc.decode('utf-8')])
+            item = qt.QTreeWidgetItem([str(i), '', '', toUnicode(plug.desc)])
             item.setCheckState(1, qc.Qt.Checked if plug.enable else qc.Qt.Unchecked)
             item.setCheckState(2, qc.Qt.Checked if plug.show_date else qc.Qt.Unchecked)
             self.addTopLevelItem(item)
@@ -1188,7 +1189,7 @@ class PluginTreeview(qt.QTreeWidget):
                     core.plugIndex.index(i)
                 except ValueError:
                     self.plugAddItems.append(i)
-                    treev.addTopLevelItem(qt.QTreeWidgetItem([core.allPlugList[i].desc.decode('utf-8')]))
+                    treev.addTopLevelItem(qt.QTreeWidgetItem([toUnicode(core.allPlugList[i].desc)]))
                     self.actionAdd.setEnabled(True)
     def startDrag(self, dropActions):
         try:
