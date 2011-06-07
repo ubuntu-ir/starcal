@@ -56,8 +56,8 @@ from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
 
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
-app = qt.QApplication(sys.argv)
 
+from scal2.ui_qt.app import app
 from scal2.ui_qt.utils import *
 from scal2.ui_qt.mywidgets import HBox, VBox
 from scal2.ui_qt.mywidgets.expander import Expander
@@ -1570,7 +1570,7 @@ class MainWin(qt.QMainWindow):
             self.sysTray.setIcon(qt.QIcon(pixmap))
             ######################################
             ##tt = core.getWeekDayN(core.getWeekDay(*ddate))
-            tt = core.getWeekDayN(core.jwday(ui.todayCell.jd))
+            tt = toUnicode(core.getWeekDayN(core.jwday(ui.todayCell.jd)))
             #if ui.extradayTray:##?????????
             #    sep = _(',')+' '
             #else:
@@ -1582,10 +1582,10 @@ class MainWin(qt.QMainWindow):
                     (y, m, d) = ui.todayCell.dates[mode]
                     tt += '%s%s %s %s'%(sep, numLocale(d), getMonthName(mode, m, y), numLocale(y))
             if ui.extradayTray:
-                text = ui.todayCell.extraday
+                text = toUnicode(ui.todayCell.extraday.replace('\t', '\n'))
                 if text:
-                    tt += '\n\n%s'%text.replace('\t', '\n').decode('utf8') #????????????
-            tt = '<div dir="rtl">%s</div>'%tt
+                    tt += u'\n\n' + text #????????????
+            tt = u'<div dir="rtl">%s</div>'%tt
             self.sysTray.setToolTip(tt)
             self.sysTray.setVisible(True)
         return True
