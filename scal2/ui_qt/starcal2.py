@@ -615,11 +615,15 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
         self.yearLabel = [None for i in range(ui.shownCalsNum)]
         self.monthLabel = [None for i in range(ui.shownCalsNum)]
         #############################
+        def addNewArrow(text):
+            arrow = qt.QPushButton(text)
+            setFizedWidthSquare(arrow)
+            arrow.setFocusPolicy(qc.Qt.NoFocus)
+            self.addWidget(arrow)
+            self.wgroup[0].append(arrow)
+            return arrow
         if showYmArrows:
-            self.arrowPY = qt.QPushButton(prevTxt)
-            setFizedWidthSquare(self.arrowPY)
-            self.addWidget(self.arrowPY)
-            self.wgroup[0].append(self.arrowPY)
+            self.arrowPY = addNewArrow(prevTxt)
         label = IntLabel(core.primaryMode)
         self.yearLabel[0] = label
         #label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
@@ -627,30 +631,19 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
         self.addWidget(label)
         self.wgroup[0].append(label)
         if showYmArrows:
-            self.arrowNY = qt.QPushButton(nextTxt)
-            setFizedWidthSquare(self.arrowNY)
-            self.addWidget(self.arrowNY)
-            self.wgroup[0].append(self.arrowNY)
+            self.arrowNY = addNewArrow(nextTxt)
             sep = VSeparator()
             self.addWidget(sep)
             #self.addStretch()
             self.wgroup[0].append(sep)
-            self.arrowPM = qt.QPushButton(prevTxt)
-            setFizedWidthSquare(self.arrowPM)
-            #self.arrowPM.set_relief(2)
-            self.addWidget(self.arrowPM)
-            self.wgroup[0].append(self.arrowPM)
+            self.arrowPM = addNewArrow(prevTxt)
         label = MonthLabel(core.primaryMode)
         self.monthLabel[0] = label
         self.connect(label, qc.SIGNAL('changed'), self.monthLabelChange)
         self.addWidget(label)
         self.wgroup[0].append(label)
         if showYmArrows:
-            self.arrowNM = qt.QPushButton(nextTxt)
-            setFizedWidthSquare(self.arrowNM)
-            #self.arrowNM.set_relief(2)
-            self.addWidget(self.arrowNM)
-            self.wgroup[0].append(self.arrowNM)
+            self.arrowNM = addNewArrow(nextTxt)
             #######
             #self.arrowsUpdate()
         #############################
