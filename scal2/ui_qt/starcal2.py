@@ -102,7 +102,8 @@ if unity.needToAdd():
 #import gettext
 #gettext.textdomain(core.APP_NAME)
 
-core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
+#core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
+core.COMMAND = 'starcal2-qt'
 ui.uiName = 'qt'
 
 def liveConfChanged():
@@ -1693,21 +1694,16 @@ def main():
             #elif sys.argv[1]=='--html':#????????????
             #    mainWin.exportHtml('calendar.html') ## exportHtml(path, months, title)
             #    sys.exit(0)
-            #else:
-                #while gtk.events_pending():## if do not this, main.sysTray.is_embedded returns False
-                #    gtk.main_iteration_do(False)
-                #show = ui.showMain or not mainWin.sysTray.is_embedded()
+            else:
+                show = ui.showMain or not mainWin.sysTray
     else:
         mainWin = MainWin(trayMode=2)
-        #while gtk.events_pending():## if do not this, mainWin.sysTray.is_embedded returns False
-        #    gtk.main_iteration_do(False)
-        show = ui.showMain or mainWin.sysTray==None ## or not main.sysTray.isVisible()
-        #print 'sysTray.isVisible = %s'%mainWin.sysTray.isVisible()
+        show = ui.showMain or not mainWin.sysTray
     #if show:
     #    mainWin.show()
     mainWin.show() ## main.raise_() ## ~= gtk.Window.show(self)
     if not show:
-    #    mainWin.hide()## FIXME
+        #mainWin.hide()## FIXME
         qc.QTimer.singleShot(100, mainWin.hide)
     ##rootWindow.set_cursor(gdk.Cursor(gdk.LEFT_PTR))#???????????
     return app.exec_()
