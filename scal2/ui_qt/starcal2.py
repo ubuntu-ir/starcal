@@ -543,7 +543,7 @@ class FClockLabel(qt.QLabel):
 
 
 class CustomizableToolbar(qt.QToolBar, MainWinItem):
-    toolbarStyleList = ('Icon', 'Text', 'Text beside Icon', 'Text below Icon')
+    styleList = ('Icon', 'Text', 'Text beside Icon', 'Text below Icon')
     setIconSize = lambda self, size: qt.QToolBar.setIconSize(self, qc.QSize(size, size))
     def __init__(self, mainWin):
         qt.QToolBar.__init__(self, mainWin)
@@ -556,11 +556,11 @@ class CustomizableToolbar(qt.QToolBar, MainWinItem):
         hbox.setMargin(0)
         hbox.addWidget(qt.QLabel(_('Style:')))
         self.styleCombo = qt.QComboBox()
-        for item in self.toolbarStyleList:
+        for item in self.styleList:
             self.styleCombo.addItem(_(item))
         hbox.addWidget(self.styleCombo)
         self.connect(self.styleCombo, qc.SIGNAL('currentIndexChanged (int)'), self.styleComboChanged)
-        styleNum = self.toolbarStyleList.index(ui.toolbarStyle)
+        styleNum = self.styleList.index(ui.toolbarStyle)
         self.styleCombo.setCurrentIndex(styleNum)
         self.setToolButtonStyle(styleNum)
         optionsWidget.addLayout(hbox)
