@@ -102,7 +102,8 @@ if unity.needToAdd():
 #import gettext
 #gettext.textdomain(core.APP_NAME)
 
-core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
+#core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
+core.COMMAND = 'starcal2-qt'
 ui.uiName = 'qt'
 
 def liveConfChanged():
@@ -542,7 +543,7 @@ class FClockLabel(qt.QLabel):
 
 
 class CustomizableToolbar(qt.QToolBar, MainWinItem):
-    toolbarStyleList = ('Icon', 'Text', 'Text beside Icon', 'Text below Icon')
+    styleList = ('Icon', 'Text', 'Text beside Icon', 'Text below Icon')
     setIconSize = lambda self, size: qt.QToolBar.setIconSize(self, qc.QSize(size, size))
     def __init__(self, mainWin):
         qt.QToolBar.__init__(self, mainWin)
@@ -555,11 +556,11 @@ class CustomizableToolbar(qt.QToolBar, MainWinItem):
         hbox.setMargin(0)
         hbox.addWidget(qt.QLabel(_('Style:')))
         self.styleCombo = qt.QComboBox()
-        for item in self.toolbarStyleList:
+        for item in self.styleList:
             self.styleCombo.addItem(_(item))
         hbox.addWidget(self.styleCombo)
         self.connect(self.styleCombo, qc.SIGNAL('currentIndexChanged (int)'), self.styleComboChanged)
-        styleNum = self.toolbarStyleList.index(ui.toolbarStyle)
+        styleNum = self.styleList.index(ui.toolbarStyle)
         self.styleCombo.setCurrentIndex(styleNum)
         self.setToolButtonStyle(styleNum)
         optionsWidget.addLayout(hbox)
@@ -1693,21 +1694,16 @@ def main():
             #elif sys.argv[1]=='--html':#????????????
             #    mainWin.exportHtml('calendar.html') ## exportHtml(path, months, title)
             #    sys.exit(0)
-            #else:
-                #while gtk.events_pending():## if do not this, main.sysTray.is_embedded returns False
-                #    gtk.main_iteration_do(False)
-                #show = ui.showMain or not mainWin.sysTray.is_embedded()
+            else:
+                show = ui.showMain or not mainWin.sysTray
     else:
         mainWin = MainWin(trayMode=2)
-        #while gtk.events_pending():## if do not this, mainWin.sysTray.is_embedded returns False
-        #    gtk.main_iteration_do(False)
-        show = ui.showMain or mainWin.sysTray==None ## or not main.sysTray.isVisible()
-        #print 'sysTray.isVisible = %s'%mainWin.sysTray.isVisible()
+        show = ui.showMain or not mainWin.sysTray
     #if show:
     #    mainWin.show()
     mainWin.show() ## main.raise_() ## ~= gtk.Window.show(self)
     if not show:
-    #    mainWin.hide()## FIXME
+        #mainWin.hide()## FIXME
         qc.QTimer.singleShot(100, mainWin.hide)
     ##rootWindow.set_cursor(gdk.Cursor(gdk.LEFT_PTR))#???????????
     return app.exec_()
