@@ -31,6 +31,7 @@ from subprocess import Popen
 
 sys.path.insert(0, dirname(dirname(dirname(__file__))))
 from scal2.paths import *
+from scal2.utils import myRaise
 
 if not isdir(confDir):
     try:
@@ -769,7 +770,7 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
     """
     def updateTextWidth(self):
         ############### update width of month labels
-        #met = qt.QFontMetrics(qfontEncode( ui.fontDefault if ui.fontUseDefault else ui.fontCustom))
+        #met = qt.QFontMetrics(qfontEncode(ui.getFont()))
         met = app.fontMetrics()
         ###
         monthWidth = []
@@ -1115,7 +1116,11 @@ class MainWin(qt.QMainWindow):
         self.items = []
         self.customizeDialog = None
         for (name, enable) in ui.mainWinItems:
-            item = defaultItemsDict[name]
+            try:
+                item = defaultItemsDict[name]
+            except:
+                myRaise()
+                continue
             item.enable = enable
             item.widget.resizeEvent = lambda event: self.childResizeEvent(item, event) ## FIXME
             self.connect(item, qc.SIGNAL('date-change'), self.onDateChange)
@@ -1633,7 +1638,7 @@ class MainWin(qt.QMainWindow):
         self.export.showDialog(y, m)
     def onConfigChange(self):
         ## apply ui.winTaskbar ## need to restart ro be applie? FIXME
-        app.setFont(qfontEncode(ui.fontDefault if ui.fontUseDefault else ui.fontCustom))
+        app.setFont(qfontEncode(ui.getFont()))
         self.updateMenuSize()
         #self.updateToolbarClock()## FIXME
         #self.updateTrayClock()

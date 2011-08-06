@@ -70,8 +70,7 @@ def calcTextWidth(text, font=None):
     if isinstance(text, str):
         text = text.decode('utf-8')
     if font==None:
-        qfont = qfontEncode(ui.fontDefault if ui.fontUseDefault
-                            else ui.fontCustom)
+        qfont = qfontEncode(ui.getFont())
     elif isinstance(font, tuple):
         qfont = qfontEncode(font)
     else:
@@ -359,8 +358,7 @@ class MonthCal(qt.QWidget, MainWinItem):
     def updateTextWidth(self):
         ### update width of week days names to understand that should be
         ### synopsis or no
-        qfont = qfontEncode(ui.fontDefault if ui.fontUseDefault
-                                                                                        else ui.fontCustom)
+        qfont = qfontEncode(ui.getFont())
         wm = 0 ## max width
         for i in xrange(7):
             w = calcTextWidth(core.weekDayName[i], qfont)
