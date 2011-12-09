@@ -166,7 +166,6 @@ toolbarItemsData = (
     ToolbarItem('date',        'date',        'selectDateShow', 'Select Date...', 'Date...'),
     ToolbarItem('customize',   'edit',        'customizeShow'),
     ToolbarItem('preferences', 'preferences', 'prefShow'),
-    ToolbarItem('add',         'add',         'showCustomDay',  'Add Custom Day'),
     ToolbarItem('export',      'convert',     'exportClicked',  'Export to HTML'),
     ToolbarItem('about',       'about',       'aboutShow',      'About StarCalendar'),
     ToolbarItem('quit',        'quit',        'quit',)
@@ -178,8 +177,6 @@ otherActionsData = (
     ToolbarItem('copy_time', 'copy', 'copyTime', 'Copy Time', 'Copy _Time'),
     ToolbarItem('copy_date', 'copy', 'copyDate', 'Copy Date', 'Copy _Date'),
     ToolbarItem('copy_date_today', 'copy', 'copyDateToday', 'Copy Date', 'Copy _Date'),
-    ToolbarItem('add_tray', 'add', 'showCustomDayTray',  'Add Custom Day', 'Add Custom Day'),
-    ToolbarItem('remove', 'remove', 'removeCustomDay', 'Remove Custom Day', '_Remove Custom Day'),
     ToolbarItem('adjust', 'preferences', 'adjustTime', 'Adjust System Time', 'Ad_just System Time'),
     ToolbarItem('export_tray', 'convert',  'exportClickedTray',  'Export to HTML'),
 )
@@ -1394,22 +1391,6 @@ class PrefDialog(qt.QWidget):
         #self.connect(item.widget, qc.SIGNAL('clicked'), self.checkbFontClicked)
         self.connect(item.widget, qc.SIGNAL('clicked()'),
                             lambda: item.widget.setEnabled(not fontDefItem.get()))
-        vbox.addLayout(hbox)
-        ###########################
-        """
-        hbox = qt.QHBoxLayout()
-        hbox.setMargin(0)
-        item = CheckPrefItem(ui, 'customdayShowText', _('Custom days text (below calendar)'))
-        self.uiPrefItems.append(item)
-        hbox.addWidget(item.widget)
-        #vbox.addLayout(hbox)
-        ###
-        """
-        hbox = qt.QHBoxLayout()
-        hbox.setMargin(0)
-        item = CheckPrefItem(ui, 'customdayShowIcon', _('Custom days icon (in the calendar)'))
-        self.uiPrefItems.append(item)
-        hbox.addWidget(item.widget)
         vbox.addLayout(hbox)
         ########################### Theme #####################
         item = CheckPrefItem(ui, 'bgUseDesk', _('Use Desktop Background'))
