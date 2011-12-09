@@ -1286,13 +1286,6 @@ class MainWin(qt.QMainWindow):
     def destroyWinCont(self):
         self.winCon.destroy()
         self.winCon = None
-
-
-    def updateCustomDay(self):
-        if ui.customDB==None:## or not ui.customdayShowText ## FIXME
-            self.customDayWidget.setData(None)
-        else:
-            self.customDayWidget.setData(ui.cell.customday)
     def childResizeEvent(self, child, event):
         child.widget.__class__.resizeEvent(child.widget, event)
         self.setMinHeightLater()
@@ -1473,28 +1466,6 @@ class MainWin(qt.QMainWindow):
         self.customDay.set_month_day(month, day)
         self.customDay.entryComment.set_text('')
         self.customDay.entryComment.grab_focus()
-        self.customDay.show()
-    def showCustomDayTray(self, item, event=None):## FIXME
-        (year, month, day) = core.getSysDate()
-        self.customDay.set_month_day(month, day)
-        #self.customDay.entryComment.set_text('')
-        #self.customDay.entryComment.grab_focus()
-        self.customDay.show()
-    def hideCustomDay(self, *args):
-        self.customDay.hide()
-        ui.loadCustomDB()
-        ui.monthCache = {}
-        self.dateChange()
-        return True                    
-    def removeCustomDay(self, widget):## FIXME
-        self.customDay.element_delete_date(ui.cell.month, ui.cell.day)
-        ui.loadCustomDB()
-        ui.monthCache = {}
-        self.dateChange()
-    def editCustomDay(self, widget):## FIXME
-        self.customDay.element_search_select(ui.cell.month, ui.cell.day)
-        self.customDay.entryComment.grab_focus()
-        self.customDay.entryComment.select_region(0, 0)
         self.customDay.show()
     def trayInit(self):
         if self.trayMode==2:
