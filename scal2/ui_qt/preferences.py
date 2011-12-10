@@ -1630,7 +1630,7 @@ class PrefDialog(qt.QWidget):
         hbox.setMargin(0)
         hbox.addWidget(newFixedLabel(_('Days maximum cache size')))
         #sgroup.add_widget(label)
-        item = SpinPrefItem(ui, 'maxCache', 0, 9999, 0, 1, 30)
+        item = SpinPrefItem(ui, 'maxDayCacheSize', 0, 9999, 0, 1, 30)
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
         hbox.addStretch()
