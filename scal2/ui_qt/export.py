@@ -22,7 +22,7 @@ import os, sys
 from scal2.locale_man import tr as _
 
 from scal2 import core
-from scal2.core import homeDir, numLocale
+from scal2.core import deskDir, numLocale
 
 from scal2 import ui
 from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
@@ -45,7 +45,7 @@ class ExportDialog(qt.QFileDialog):
         self.setAcceptMode(qt.QFileDialog.AcceptSave)
         self.setFileMode(qt.QFileDialog.AnyFile)## FIXME
         self.setOption(qt.QFileDialog.HideNameFilterDetails)
-        self.setWindowTitle(_('Export to HTML'))
+        self.setWindowTitle(_('Export to ')+'HTML')
         self.vbox = VBox()
         ########
         hbox = HBox()
@@ -75,7 +75,7 @@ class ExportDialog(qt.QFileDialog):
         self.connect(combo, qc.SIGNAL('currentIndexChanged (int)'), self.comboChanged)
         self.connect(self, qc.SIGNAL('fileSelected (const QString&)'), self.save)
         try:
-            self.setDirectory('%s/Desktop'%homeDir)
+            self.setDirectory(deskDir)
         except:## FIXME
             pass    
     def comboChanged(self, index=None, ym=None):
