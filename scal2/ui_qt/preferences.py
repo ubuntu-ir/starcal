@@ -625,25 +625,6 @@ class CheckStartupPrefItem(PrefItem):### cbStartCommon
         self.widget.setSizePolicy(qt.QSizePolicy.Minimum, qt.QSizePolicy.Fixed)
         self.get = lambda: w.checkState()==qc.Qt.Checked
         self.set = lambda v: w.setCheckState(qc.Qt.Checked if v else qc.Qt.Unchecked)
-    def addStartup(self, path):
-        text='''[Desktop Entry]
-Type=Application
-Name=StarCalendar %s
-Icon=starcal
-Exec="%s" --no-tray-check'''%(core.VERSION, core.COMMAND)
-        ## double quotes needed when the path has space
-        try:
-            os.makedirs(dirname(path))
-        except:
-            pass
-        try:
-            fp = file(path, 'w')
-        except:
-            core.myRaise(__file__)
-            return False
-        else:
-            fp.write(text)
-            return True
     def updateVar(self):
         if self.get():
             if not ui.addStartup():
