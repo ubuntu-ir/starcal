@@ -25,7 +25,7 @@ from scal2.locale_man import tr as _
 from scal2.locale_man import rtl, rtlSgn
 
 from scal2 import core
-from scal2.core import myRaise, numLocale, getMonthName, getMonthLen, getNextMonth, getPrevMonth, pixDir
+from scal2.core import myRaise, getMonthName, getMonthLen, getNextMonth, getPrevMonth, pixDir
 
 from scal2 import ui
 from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
@@ -35,21 +35,6 @@ from PyQt4 import QtCore as qc
 
 from scal2.ui_qt.mywidgets import HBox, VBox
 from scal2.ui_qt.customize import MainWinItem
-
-def fillColor(cr, color):
-    if len(color)==3:
-        cr.set_source_rgb(color[0] / 255.0,
-                          color[1] / 255.0,
-                          color[2] / 255.0)
-    elif len(color)==4:
-        cr.set_source_rgba(color[0] / 255.0,
-                           color[1] / 255.0,
-                           color[2] / 255.0,
-                           color[3] / 255.0)
-    else:
-        raise ValueError
-    cr.fill()
-
 
 qfontDecode = lambda qfont: (
     str(qfont.family()),
@@ -189,7 +174,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                     ui.calLeftMargin,
                     self.dy, 
                     qc.Qt.AlignCenter,
-                    numLocale(status.weekNum[i])
+                    _(status.weekNum[i])
                 )
         cursor = True ## FIXME
         quad = 90 ## 90*16
@@ -248,7 +233,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                 item = shown[0]
                 if item['enable']:
                     mode = item['mode']
-                    num = numLocale(c.dates[mode][2], mode)
+                    num = _(c.dates[mode][2], mode)
                     qfont = qfontEncode(item['font'])
                     met = qt.QFontMetrics(qfont)
                     fontw = met.maxWidth() * len(num)
@@ -270,7 +255,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                     for item in shown[1:]:
                         if item['enable']:
                             mode = item['mode']
-                            num = numLocale(c.dates[mode][2], mode)
+                            num = _(c.dates[mode][2], mode)
                             qfont = qfontEncode(item['font'])
                             met = qt.QFontMetrics(qfont)
                             fontw = met.maxWidth() * len(num)
