@@ -42,7 +42,6 @@ from scal2.locale_man import tr as _
 #_ = loadTranslator(True)## FIXME
 
 from scal2 import core
-from scal2.core import numLocale
 
 from scal2.ui_qt.preferences import qpixDir
 from scal2.ui_qt import preferences
@@ -216,7 +215,7 @@ class StarCalApplet(MainWin):
             self.painter.begin(self.pmap)
             w = self.pmap.width()
             h = self.pmap.height()
-            self.painter.drawText(qc.QPoint(0, h-2), numLocale(ddate[2]).decode('utf-8'))
+            self.painter.drawText(qc.QPoint(0, h-2), _(ddate[2]))
             self.iconT.setPixmap(self.pmap)
             self.icon.setWidget(self.iconT)
             #self.icon.setGeometry(qc.QRectF(0, 0, w, h))
@@ -231,18 +230,18 @@ class StarCalApplet(MainWin):
             #if ui.extradayTray:##?????????
             #    sep = _(',')+' '
             #else:
-            sep = '<br>'
+            sep = u'<br>'
             for item in ui.shownCals:
                 if item['enable']:
                     mode = item['mode']
                     (y, m, d) = ui.todayCell.dates[mode]
-                    tt += '%s%s %s %s'%(sep, numLocale(d), core.getMonthName(mode, m), numLocale(y))
+                    tt += u'%s%s %s %s'%(sep, _(d), core.getMonthName(mode, m), _(y))
             if ui.extradayTray:
                 text = ui.todayCell.extraday
                 if text!='':
-                    tt += '%s%s'%(sep, text.replace('\t', sep)) #????????????
+                    tt += u'%s%s'%(sep, text.replace(u'\t', sep)) #????????????
             if rtl:## tags: div, p, body
-                tt = '<p dir="rtl">%s</p>'%tt
+                tt = u'<p dir="rtl">%s</p>'%tt
             #else:
             #    tt = '<p dir="ltr">%s</p>'%tt
             self.tooltipContent.setMainText('') ## self.name

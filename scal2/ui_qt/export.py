@@ -22,7 +22,7 @@ import os, sys
 from scal2.locale_man import tr as _
 
 from scal2 import core
-from scal2.core import deskDir, numLocale
+from scal2.core import deskDir
 
 from scal2 import ui
 from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
@@ -115,11 +115,11 @@ class ExportDialog(qt.QFileDialog):
         if i==0:
             s = getCurrentMonthStatus()
             months = [s]
-            title = '%s %s'%(core.getMonthName(core.primaryMode, s.month, s.year), numLocale(s.year))
+            title = '%s %s'%(core.getMonthName(core.primaryMode, s.month, s.year), _(s.year))
         elif i==1:
             for i in xrange(1, 13):
                 months.append(getMonthStatus(ui.cell.year, i))
-            title = '%s %s'%(_('Calendar'), numLocale(ui.cell.year))
+            title = '%s %s'%(_('Calendar'), _(ui.cell.year))
         elif i==2:
             (y0, m0) = self.ymBox0.getYM()
             (y1, m1) = self.ymBox1.getYM()

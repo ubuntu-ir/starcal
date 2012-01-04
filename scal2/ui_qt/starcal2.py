@@ -45,7 +45,7 @@ from scal2.locale_man import rtl, lang, loadTranslator ## import scal2.locale_ma
 _ = loadTranslator(True)## FIXME
 #from scal2.locale_man import tr as _
 
-from scal2.core import convert, numLocale, getMonthName, getMonthLen, getNextMonth, getPrevMonth
+from scal2.core import convert, getMonthName, getMonthLen, getNextMonth, getPrevMonth
 
 core.loadAllPlugins()## FIXME
 core.showInfo()
@@ -151,7 +151,7 @@ class MonthLabel(qt.QLabel):
         actions = []
         for i in range(12):
             if ui.monthRMenuNum:
-                text = '%s: %s'%(numLocale(i+1, fillZero=2), getMonthName(mode, i+1))
+                text = '%s: %s'%(_(i+1, fillZero=2), getMonthName(mode, i+1))
             else:
                 text = getMonthName(mode, i+1)
             action = menu.addAction(text)
@@ -226,7 +226,7 @@ class IntLabel(qt.QLabel):## label_id is the same calendar mode for a year label
     def __init__(self, label_id):
         self.label_id = label_id
         active = 0
-        qt.QLabel.__init__(self, numLocale(active))
+        qt.QLabel.__init__(self, _(active))
         self.setAlignment(qc.Qt.AlignCenter)
         self.menu = qt.QMenu(self)
         self.menuWidth = 0
@@ -273,11 +273,11 @@ class IntLabel(qt.QLabel):## label_id is the same calendar mode for a year label
         #self.connect('enter-notify-event', self.highlight)
         #self.connect('leave-notify-event', self.unhighlight)
     def setActive(self, active):
-        self.setText(numLocale(active))
+        self.setText(_(active))
         self.active = active
     def updateMenu(self):
         for action in self.actions:
-            action.setText(numLocale(self.start + action.index))
+            action.setText(_(self.start + action.index))
     def itemActivate(self, action):
         if not hasattr(action, 'index'):
             return
@@ -290,7 +290,7 @@ class IntLabel(qt.QLabel):## label_id is the same calendar mode for a year label
         start = self.active - index
         self.start = start
         for i in range(self.itemsNum):
-            self.actions[i].setText(numLocale(start+i))
+            self.actions[i].setText(_(start+i))
             self.actions[i].num = start+i
         self.menu.setActiveAction(self.actions[index])
         x = event.globalX() - self.menuWidth/2
@@ -789,7 +789,7 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
             mode = ui.shownCals[i]['mode']
             self.monthLabel[i].setFixedWidth(monthWidth[mode])
         ###
-        yearWidth = int(4 * max([met.charWidth(numLocale(i), 0) for i in range(10)]))
+        yearWidth = int(4 * max([met.charWidth(_(i), 0) for i in range(10)]))
         for label in self.yearLabel:
             label.setFixedWidth(yearWidth)
     def onConfigChange(self):
@@ -1535,7 +1535,7 @@ class MainWin(qt.QMainWindow):
                 y = s/4+int((0.9*s-h)/2) +5
             else:
                 y = ui.trayY0
-            painter.drawText(0, y, w, h-y, qc.Qt.AlignCenter, numLocale(ddate[2]))
+            painter.drawText(0, y, w, h-y, qc.Qt.AlignCenter, _(ddate[2]))
             painter.end()
             self.sysTray.setIcon(qt.QIcon(pixmap))
             ######################################
@@ -1544,13 +1544,13 @@ class MainWin(qt.QMainWindow):
             #if ui.extradayTray:##?????????
             #    sep = _(',')+' '
             #else:
-            sep = '\n'
+            sep = u'\n'
             for item in ui.shownCals:
                 if item['enable']:
                     mode = item['mode']
                     module = core.modules[mode]
                     (y, m, d) = ui.todayCell.dates[mode]
-                    tt += '%s%s %s %s'%(sep, numLocale(d), getMonthName(mode, m, y), numLocale(y))
+                    tt += u'%s%s %s %s'%(sep, _(d), getMonthName(mode, m, y), _(y))
             if ui.extradayTray:
                 text = toUnicode(ui.todayCell.extraday.replace('\t', '\n'))
                 if text:

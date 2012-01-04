@@ -33,7 +33,7 @@ from scal2.locale_man import langDict
 from scal2.utils import toUnicode
 
 from scal2 import core
-from scal2.core import convert, numLocale, myRaise, rootDir, pixDir, confDir, sysConfDir
+from scal2.core import convert, myRaise, rootDir, pixDir, confDir, sysConfDir
 
 from scal2.format_time import compileTmFormat
 
