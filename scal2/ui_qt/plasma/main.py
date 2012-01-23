@@ -227,7 +227,7 @@ class StarCalApplet(MainWin):
             ####################
             wd = core.getWeekDay(*ddate)
             tt = core.getWeekDayN(wd)
-            #if ui.extradayTray:##?????????
+            #if ui.pluginsTextTray:##?????????
             #    sep = _(',')+' '
             #else:
             sep = u'<br>'
@@ -236,8 +236,8 @@ class StarCalApplet(MainWin):
                     mode = item['mode']
                     (y, m, d) = ui.todayCell.dates[mode]
                     tt += u'%s%s %s %s'%(sep, _(d), core.getMonthName(mode, m), _(y))
-            if ui.extradayTray:
-                text = ui.todayCell.extraday
+            if ui.pluginsTextTray:
+                text = ui.todayCell.pluginsText
                 if text!='':
                     tt += u'%s%s'%(sep, text.replace(u'\t', sep)) #????????????
             if rtl:## tags: div, p, body
