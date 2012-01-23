@@ -1673,14 +1673,14 @@ class PrefDialog(qt.QWidget):
         vbox.setMargin(0)
         vbox3 = vbox
         #####
-        ##extradayTray:
+        ##pluginsTextTray:
         hbox = qt.QHBoxLayout()
         hbox.setMargin(0)
         #hbox.addStretch()
         if trayMode==1:
-            item = CheckPrefItem(ui, 'extradayTray', _('Show in applet (for today)'))
+            item = CheckPrefItem(ui, 'pluginsTextTray', _('Show in applet (for today)'))
         else:
-            item = CheckPrefItem(ui, 'extradayTray', _('Show in tray (for today)'))
+            item = CheckPrefItem(ui, 'pluginsTextTray', _('Show in tray (for today)'))
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
         #hbox.addStretch()

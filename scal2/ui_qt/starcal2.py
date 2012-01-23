@@ -843,10 +843,10 @@ class StatusBox(qt.QStatusBar, MainWinItem): ## FIXME
         #print self.width(), met.width(text)
 
 """
-class ExtraTextWidget(VBox, MainWinItem):
+class PluginsTextBox(VBox, MainWinItem):
     def __init__(self, window=None, populatePopupFunc=None):
         VBox.__init__(self)
-        self.enableExpander = ui.extraTextInsideExpander ## FIXME
+        self.enableExpander = ui.pluginsTextInsideExpander ## FIXME
         self.window = window
         #####
         self.textview = qt.QTextEdit()
@@ -861,20 +861,20 @@ class ExtraTextWidget(VBox, MainWinItem):
         #    self.textview.connect('populate-popup', populatePopupFunc)## FIXME
         #####
         self.expander = Expander(parent=self, window=None, indent=5)
-        def extraTextExpanded(item):
-            ui.extraTextIsExpanded = True
+        def pluginsTextBoxExpanded(item):
+            ui.pluginsTextIsExpanded = True
             ui.saveLiveConf()
-        def extraTextCollapsed(item):
-            ui.extraTextIsExpanded = False
+        def pluginsTextBoxCollapsed(item):
+            ui.pluginsTextIsExpanded = False
             ui.saveLiveConf()
             if self.window:
                 self.window.setMinHeightLater()
-        self.connect(self.expander, qc.SIGNAL('itemExpanded (QTreeWidgetItem *)'), extraTextExpanded)
-        self.connect(self.expander, qc.SIGNAL('itemCollapsed (QTreeWidgetItem *)'), extraTextCollapsed)
+        self.connect(self.expander, qc.SIGNAL('itemExpanded (QTreeWidgetItem *)'), pluginsTextBoxExpanded)
+        self.connect(self.expander, qc.SIGNAL('itemCollapsed (QTreeWidgetItem *)'), pluginsTextBoxCollapsed)
         if self.enableExpander:
             self.expander.addWidget(self.textview)
             self.addWidget(self.expander)
-            self.expander.setExpanded(ui.extraTextIsExpanded)
+            self.expander.setExpanded(ui.pluginsTextIsExpanded)
         else:
             self.addWidget(self.textview)
         #####
@@ -888,7 +888,7 @@ class ExtraTextWidget(VBox, MainWinItem):
         self.setEnableExpander(self.enableExpander)
         optionsWidget.addWidget(self.enableExpanderCheckb)
         ####
-        MainWinItem.__init__(self, 'extraText', _('Plugins Text'), optionsWidget=optionsWidget)
+        MainWinItem.__init__(self, 'pluginsText', _('Plugins Text'), optionsWidget=optionsWidget)
     def enableExpanderCheckbStateChanged(self, state):
         print 'enableExpanderCheckbStateChanged'
         self.setEnableExpander(state == qc.Qt.Checked)
@@ -931,16 +931,16 @@ class ExtraTextWidget(VBox, MainWinItem):
                 self.textview.show()
         self.enableExpander = enable
     def updateVars(self):
-        ui.extraTextInsideExpander = self.enableExpander
+        ui.pluginsTextInsideExpander = self.enableExpander
     def confStr(self):
         text = ''
-        for mod_attr in ('ui.extraTextInsideExpander',):
+        for mod_attr in ('ui.pluginsTextInsideExpander',):
             text += '%s=%r\n'%(mod_attr, eval(mod_attr))
         return text
 """
 
 
-class ExtraTextWidget(qt.QTextBrowser, MainWinItem):
+class PluginsTextBox(qt.QTextBrowser, MainWinItem):
     def __init__(self, populatePopupFunc=None):
         qt.QTextBrowser.__init__(self)
         self.setAlignment(qc.Qt.AlignCenter)
@@ -954,7 +954,7 @@ class ExtraTextWidget(qt.QTextBrowser, MainWinItem):
         #    self.connect('populate-popup', populatePopupFunc)## FIXME
         #####
         #self.show() ## FIXME
-        MainWinItem.__init__(self, 'extraText', _('Plugins Text'))
+        MainWinItem.__init__(self, 'pluginsText', _('Plugins Text'))
     def fixHeight(self):
         self.document().setTextWidth(self.width())
         h = self.document().size().height() # + 5
@@ -971,11 +971,11 @@ class ExtraTextWidget(qt.QTextBrowser, MainWinItem):
             self.hide()
     def confStr(self):
         text = ''
-        for mod_attr in ('ui.extraTextInsideExpander',):
+        for mod_attr in ('ui.pluginsTextInsideExpander',):
             text += '%s=%r\n'%(mod_attr, eval(mod_attr))
         return text
     def onDateChange(self):
-        self.setText(ui.cell.extraday)
+        self.setText(ui.cell.pluginsText)
 
 class CustomDayWidget(HBox, MainWinItem):
     def __init__(self, populatePopupFunc=None):
@@ -1101,7 +1101,7 @@ class MainWin(qt.QMainWindow):
         ########
         self.setCentralWidget(self.vbox)
         ####################
-        self.extraText = ExtraTextWidget()## self.populatePopup ## FIXME
+        self.pluginsTextBox = PluginsTextBox()## self.populatePopup ## FIXME
         self.customDayWidget = CustomDayWidget()## self.populatePopup ## FIXME
         ####################
         defaultItems = [
@@ -1109,7 +1109,7 @@ class MainWin(qt.QMainWindow):
             YearMonthLabelBox(),
             self.mcal,
             StatusBox(),
-            self.extraText,
+            self.pluginsTextBox,
             self.customDayWidget
         ]
         defaultItemsDict = dict([(obj._name, obj) for obj in defaultItems])
@@ -1541,7 +1541,7 @@ class MainWin(qt.QMainWindow):
             ######################################
             ##tt = core.getWeekDayN(core.getWeekDay(*ddate))
             tt = toUnicode(core.getWeekDayN(core.jwday(ui.todayCell.jd)))
-            #if ui.extradayTray:##?????????
+            #if ui.pluginsTextTray:##?????????
             #    sep = _(',')+' '
             #else:
             sep = u'\n'
@@ -1551,8 +1551,8 @@ class MainWin(qt.QMainWindow):
                     module = core.modules[mode]
                     (y, m, d) = ui.todayCell.dates[mode]
                     tt += u'%s%s %s %s'%(sep, _(d), getMonthName(mode, m, y), _(y))
-            if ui.extradayTray:
-                text = toUnicode(ui.todayCell.extraday.replace('\t', '\n'))
+            if ui.pluginsTextTray:
+                text = toUnicode(ui.todayCell.pluginsText.replace('\t', '\n'))
                 if text:
                     tt += u'\n\n' + text #????????????
             tt = u'<div dir="rtl">%s</div>'%tt
@@ -1638,9 +1638,7 @@ class MainWin(qt.QMainWindow):
 ################# end of function and class defenitions ########################
 
 
-## myUrlShow
-## clickWebsite
-## gtk.link_button_set_uri_hook(clickWebsite) ?????????????
+## gtk.link_button_set_uri_hook(ui.openUrl) FIXME ?????????????
 
 ## Maybe this file be imported from plasma applet file
 def main():
