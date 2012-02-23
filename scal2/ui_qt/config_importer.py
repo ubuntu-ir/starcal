@@ -16,6 +16,8 @@
 ##    with this program. Or on Debian systems, from /usr/share/common-licenses/GPL
 ##    If not, see <http://www.gnu.org/licenses/gpl.txt>.
 
+APP_DESC = 'StarCalendar'
+
 import os, sys, shutil
 from os.path import dirname
 from os.path import join, isfile, isdir, exists
@@ -36,8 +38,7 @@ langCodeList = []
 langDefaultCode = ''
 
 win = qt.QDialog()
-win.setWindowTitle('StarCalendar - First Run')
-
+win.setWindowTitle(APP_DESC+' - First Run')
 
 win.setWindowIcon(qt.QIcon('%s/starcal2.png'%pixDir))
 vboxL = qt.QVBoxLayout()
@@ -51,7 +52,7 @@ langHbox.addWidget(qt.QLabel('Select Language:'))
 importCheckb = None
 oldVersion = getOldVersion()
 if oldVersion and '1.5.0' < oldVersion < '1.6.0':## FIXME
-    importCheckb = qt.QCheckBox('Import configurations from StarCalendar %s'%oldVersion)
+    importCheckb = qt.QCheckBox('Import configurations from %s %s'%(APP_DESC, oldVersion))
     importCheckb.connect(importCheckb, qc.SIGNAL('stateChanged (int)'), lambda state: langHbox.setEnabled(state!=qc.Qt.Checked))
     importCheckb.setCheckState(qc.Qt.Checked)
     vboxL.addWidget(importCheckb)

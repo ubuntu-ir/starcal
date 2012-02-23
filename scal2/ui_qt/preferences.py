@@ -40,7 +40,6 @@ from scal2.format_time import compileTmFormat
 from scal2 import ui
 
 
-##from scal2.ui_qt import starcal_qt
 #from scal2.ui_qt.monthcal import calcTextWidth
 from scal2.ui_qt.mywidgets import HBox, VBox
 from scal2.ui_qt.mywidgets.expander import Expander
@@ -162,13 +161,13 @@ class ToolbarItem:
         return action
 
 toolbarItemsData = (
-    ToolbarItem('today',       'go-home',     'goToday',        'Select Today'),
-    ToolbarItem('date',        'date',        'selectDateShow', 'Select Date...', 'Date...'),
-    ToolbarItem('customize',   'edit',        'customizeShow'),
+    ToolbarItem('today', 'go-home', 'goToday', 'Select Today'),
+    ToolbarItem('date', 'date', 'selectDateShow', 'Select Date...', 'Date...'),
+    ToolbarItem('customize', 'edit', 'customizeShow'),
     ToolbarItem('preferences', 'preferences', 'prefShow'),
-    ToolbarItem('export',      'convert',     'exportClicked',  'Export to HTML'),
-    ToolbarItem('about',       'about',       'aboutShow',      'About StarCalendar'),
-    ToolbarItem('quit',        'quit',        'quit',)
+    ToolbarItem('export', 'convert', 'exportClicked',  _('Export to ')+'HTML'),
+    ToolbarItem('about', 'about', 'aboutShow', _('About ')+core.APP_DESC),
+    ToolbarItem('quit', 'quit', 'quit',)
 )
 
 toolbarItemsDataDict = dict([(item.name, item) for item in toolbarItemsData])
@@ -178,7 +177,7 @@ otherActionsData = (
     ToolbarItem('copy_date', 'copy', 'copyDate', 'Copy Date', 'Copy _Date'),
     ToolbarItem('copy_date_today', 'copy', 'copyDateToday', 'Copy Date', 'Copy _Date'),
     ToolbarItem('adjust', 'preferences', 'adjustTime', 'Adjust System Time', 'Ad_just System Time'),
-    ToolbarItem('export_tray', 'convert',  'exportClickedTray',  'Export to HTML'),
+    ToolbarItem('export_tray', 'convert',  'exportClickedTray',  _('Export to ')+'HTML'),
 )
 
 
@@ -1917,8 +1916,8 @@ class PrefDialog(qt.QWidget):
             #if self.trayMode==1:
             #    pass ##?????????????????????????????????????????????????
             #else:
-            result = qt.QMessageBox.question(self, _('Need Restart StarCalendar'),
-                _('Some preferences need for restart StarCalendar to apply.'),
+            result = qt.QMessageBox.question(self, _('Need Restart '+core.APP_DESC),
+                _('Some preferences need for restart %s to apply.'%core.APP_DESC),
                 _('_Restart'), _('_Cancel'), '', 0, 1)
             if result==0:
                 self.mainWin.restart()

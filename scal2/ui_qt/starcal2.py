@@ -47,7 +47,6 @@ _ = loadTranslator(True)## FIXME
 
 from scal2.core import convert, getMonthName, getMonthLen, getNextMonth, getPrevMonth
 
-core.loadAllPlugins()## FIXME
 core.showInfo()
 
 from scal2 import ui
@@ -73,6 +72,7 @@ from scal2.ui_qt.monthcal import MonthCal, qfontEncode
 
 
 from scal2 import unity
+
 if unity.needToAdd():
     dialog = qt.QDialog()
     dialog.setWindowTitle('Tray Icon')
@@ -1048,8 +1048,8 @@ class MainWin(qt.QMainWindow):
         ###########
         self.lastGDate = None
         #########
-        self.setWindowTitle('StarCalendar %s'%core.VERSION)
-        self.setWindowRole('starcal2')
+        self.setWindowTitle('%s %s'%(core.APP_DESC, core.VERSION))
+        self.setWindowRole(core.APP_NAME)
         self.setMinHeight()
         #self.setBaseSize(ui.winWidth, ui.winHeight)
         self.move(ui.winX, ui.winY)
@@ -1147,9 +1147,9 @@ class MainWin(qt.QMainWindow):
         self.connect(self.selectDateDialog, qc.SIGNAL('response-date'), self.selectDateResponse)
         ############### Building About Dialog
         about = AboutDialog()
-        about.set_name('StarCalendar') ## or set_program_name
+        about.set_name(core.APP_DESC) ## or set_program_name
         about.set_version(core.VERSION)
-        about.set_title(_('About ')+'StarCalendar') ## must call after set_name and set_version !
+        about.set_title(_('About ')+core.APP_DESC) ## must call after set_name and set_version !
         about.set_authors([_(line) for line in open(join(rootDir, 'authors-dialog')).read().splitlines()])
         about.set_comments(core.aboutText)
         about.set_license(core.licenseText)
