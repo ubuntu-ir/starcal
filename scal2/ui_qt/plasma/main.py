@@ -113,7 +113,7 @@ class StarCalApplet(MainWin):
     def __init__(self, papplet):
         self.papplet = papplet
         self.tbutton = papplet.tbutton
-        self.name = 'StarCalendar' ## self.papplet.package().metadata().name()
+        self.name = core.APP_DESC ## self.papplet.package().metadata().name()
         MainWin.__init__(self, trayMode=1)
         ######
         self.timer = qc.QTimer(self.tbutton) ## argument not necessary
