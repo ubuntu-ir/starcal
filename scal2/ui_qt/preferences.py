@@ -165,7 +165,7 @@ toolbarItemsData = (
     ToolbarItem('date', 'date', 'selectDateShow', 'Select Date...', 'Date...'),
     ToolbarItem('customize', 'edit', 'customizeShow'),
     ToolbarItem('preferences', 'preferences', 'prefShow'),
-    ToolbarItem('export', 'convert', 'exportClicked',  _('Export to ')+'HTML'),
+    ToolbarItem('export', 'convert', 'exportClicked',  _('Export to %s')%'HTML'),
     ToolbarItem('about', 'about', 'aboutShow', _('About ')+core.APP_DESC),
     ToolbarItem('quit', 'quit', 'quit',)
 )
@@ -177,7 +177,7 @@ otherActionsData = (
     ToolbarItem('copy_date', 'copy', 'copyDate', 'Copy Date', 'Copy _Date'),
     ToolbarItem('copy_date_today', 'copy', 'copyDateToday', 'Copy Date', 'Copy _Date'),
     ToolbarItem('adjust', 'preferences', 'adjustTime', 'Adjust System Time', 'Ad_just System Time'),
-    ToolbarItem('export_tray', 'convert',  'exportClickedTray',  _('Export to ')+'HTML'),
+    ToolbarItem('export_tray', 'convert',  'exportClickedTray',  _('Export to %s')%'HTML'),
 )
 
 
