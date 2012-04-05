@@ -45,7 +45,7 @@ class ExportDialog(qt.QFileDialog):
         self.setAcceptMode(qt.QFileDialog.AcceptSave)
         self.setFileMode(qt.QFileDialog.AnyFile)## FIXME
         self.setOption(qt.QFileDialog.HideNameFilterDetails)
-        self.setWindowTitle(_('Export to ')+'HTML')
+        self.setWindowTitle(_('Export to %s')%'HTML')
         self.vbox = VBox()
         ########
         hbox = HBox()
