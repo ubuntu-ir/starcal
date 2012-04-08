@@ -1266,7 +1266,7 @@ class MainWin(qt.QMainWindow):
             self.showCustomDay(month=ui.cell.month, day=ui.cell.day)
         elif k == qc.Qt.Key_Q:
             self.quit()
-        #elif gdk.keyval_name(k).startswith('ALT'):## Alt+F7 ##???????????? Does not receive "F7"
+        #if Alt+F7: FIXME
         #    self.startManualMoving()
         else:
             for item in self.items:
