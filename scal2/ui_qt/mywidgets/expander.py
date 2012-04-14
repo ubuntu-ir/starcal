@@ -48,7 +48,7 @@ class Expander(qt.QTreeWidget):
             def onExpanderChanged(item):
                 self.setMinimumHeight(self.minimumSizeHint().height())
                 qc.QTimer.singleShot(200, resizeLater)
-            
+
             self.connect(self, qc.SIGNAL('itemCollapsed(QTreeWidgetItem *)'), onExpanderChanged)
             self.connect(self, qc.SIGNAL('itemExpanded(QTreeWidgetItem *)'), onExpanderChanged)
     def addWidget(self, widget):

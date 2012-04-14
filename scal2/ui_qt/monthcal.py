@@ -7,7 +7,7 @@
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful, 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
@@ -39,13 +39,13 @@ from scal2.ui_qt.customize import MainWinItem
 qfontDecode = lambda qfont: (
     str(qfont.family()),
     qfont.bold(),
-    qfont.italic(), 
+    qfont.italic(),
     qfont.pointSize()
 )
 
 qfontEncode = lambda font: qt.QFont(
     font[0],
-    font[3], 
+    font[3],
     qt.QFont.Bold if font[1] else qt.QFont.Normal,
     font[2]
 )
@@ -170,9 +170,9 @@ class MonthCal(qt.QWidget, MainWinItem):
             for i in xrange(6):
                 painter.drawText(
                     w - ui.calLeftMargin if rtl else 0,
-                    self.cy[i]-self.dy/2.0, 
+                    self.cy[i]-self.dy/2.0,
                     ui.calLeftMargin,
-                    self.dy, 
+                    self.dy,
                     qc.Qt.AlignCenter,
                     _(status.weekNum[i])
                 )
@@ -347,7 +347,7 @@ class MonthCal(qt.QWidget, MainWinItem):
         wm = 0 ## max width
         for i in xrange(7):
             w = calcTextWidth(core.weekDayName[i], qfont)
-            #print w, 
+            #print w,
             if w > wm:
                 wm = w
         self.wdaysWidth = wm*7 + ui.calLeftMargin
@@ -456,7 +456,7 @@ class MonthCal(qt.QWidget, MainWinItem):
         self.update()## equivalent of self.queue_draw() in GTK
         self.emit(qc.SIGNAL('date-change'), self)
     goToday = lambda self, widget=None: self.changeDate(*core.getSysDate())
-    getCellPos = lambda self: (int(self.cx[ui.cell.monthPos[0]]), 
+    getCellPos = lambda self: (int(self.cx[ui.cell.monthPos[0]]),
                                int(self.cy[ui.cell.monthPos[1]] + self.dy/2.0))
     def getMainMenuPos(self):#???????????????????
         if rtl:

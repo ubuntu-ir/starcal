@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-# This application is released under the GNU General Public License 
-# v3 (or, at your option, any later version). You can find the full 
-# text of the license under http://www.gnu.org/licenses/gpl.txt. 
-# By using, editing and/or distributing this software you agree to 
-# the terms and conditions of this license. 
+# This application is released under the GNU General Public License
+# v3 (or, at your option, any later version). You can find the full
+# text of the license under http://www.gnu.org/licenses/gpl.txt.
+# By using, editing and/or distributing this software you agree to
+# the terms and conditions of this license.
 # Thank you for using free software!
 
 #  StarCalendarScreenlet (C) 2010 Saeed Rasooli
@@ -28,7 +28,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
     """
        Screenlet version of StarCalendar, a perfect calendar program
     """
-    
+
     # default meta-info for Screenlets
     __name__ = 'StarCalendarScreenlet'
     __version__ = '2.0.0'
@@ -66,37 +66,37 @@ class StarCalendarScreenlet(screenlets.Screenlet):
     p_layout = None
     # constructor
     def __init__(self, **keyword_args):
-        screenlets.Screenlet.__init__(self, width=int(102*2), height=int(105*2),uses_theme=True, **keyword_args) 
+        screenlets.Screenlet.__init__(self, width=int(102*2), height=int(105*2),uses_theme=True, **keyword_args)
         # get localized day names
         locale.setlocale(locale.LC_ALL, '');
         # we convert to unicode here for the first letter extraction to work well
-        self.__day_names = [locale.nl_langinfo(locale.DAY_1 + i).decode() for i in range(7)] 
+        self.__day_names = [locale.nl_langinfo(locale.DAY_1 + i).decode() for i in range(7)]
         self.first_weekday = self.__day_names[self.__first_day]
         # call super (and not show window yet)
         # set theme
-        self.add_menuitem("icspath", "Ics file path")    
+        self.add_menuitem("icspath", "Ics file path")
         self.add_menuitem("events", "View events")
         self.add_menuitem("mini", "Toggle view events")
-        self.add_menuitem("update", "Update events")    
+        self.add_menuitem("update", "Update events")
         self.theme_name = "default"
         # add settings
         self.add_options_group('iCalendar', 'Calendar specific options')
         self.add_option(StringOption('iCalendar', 'first_weekday', self.first_weekday,
             'First Weekday', 'The day to be shown in the leftmost column',
             choices = self.__day_names))
-        self.add_option(BoolOption('iCalendar', 'enable_buttons', self.enable_buttons, 
+        self.add_option(BoolOption('iCalendar', 'enable_buttons', self.enable_buttons,
             'Enable month shifting', 'Enable buttons selecting another months'))
         #self.add_option(StringOption('iCalendar', 'icalpath', self.icalpath, 'iCalendar ics file path', 'The full path where the .ics file is located , local or url) ...'), realtime=False)
         self.add_option(BoolOption('iCalendar', 'showevents',bool(self.showevents), 'Show iCalendar events','Show iCalendar events'),realtime=False)
-        self.add_option(ColorOption('iCalendar','font_color', 
+        self.add_option(ColorOption('iCalendar','font_color',
             self.font_color, 'Text color', 'font_color'))
-        self.add_option(ColorOption('iCalendar','background_color', 
+        self.add_option(ColorOption('iCalendar','background_color',
             self.background_color, 'Back color(only with default theme)', 'only works with default theme'))
-        self.add_option(ColorOption('iCalendar','today_color', 
+        self.add_option(ColorOption('iCalendar','today_color',
             self.today_color, 'Today color', 'today_color'))
-        self.add_option(ColorOption('iCalendar','event_color', 
+        self.add_option(ColorOption('iCalendar','event_color',
             self.event_color, 'Event day color', 'event_color'))
-        self.add_option(ColorOption('iCalendar','today_event_color', 
+        self.add_option(ColorOption('iCalendar','today_event_color',
             self.today_event_color, 'Today event color', 'today_event_color'))
         # init the timeout functions
         self.update_interval = self.update_interval
@@ -118,7 +118,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
                 self.__dict__['update_interval'] = value
                 if self.__timeout:
                     gobject.source_remove(self.__timeout)
-                self.__timeout = gobject.timeout_add(value 
+                self.__timeout = gobject.timeout_add(value
                         * 1000, self.update)
             else:
                 # TODO: raise exception!!!
@@ -130,7 +130,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
         elif name == 'enable_buttons':
             self.__dict__['enable_buttons'] = value
             if value == True and not self.__buttons_timeout:
-                self.__buttons_timeout = gobject.timeout_add(100, 
+                self.__buttons_timeout = gobject.timeout_add(100,
                         self.update_buttons)
             elif value == False and self.__buttons_timeout:
                 gobject.source_remove(self.__buttons_timeout)
@@ -140,8 +140,8 @@ class StarCalendarScreenlet(screenlets.Screenlet):
     def on_init (self):
         print "Screenlet has been initialized."
         # add default menuitems
-        self.add_default_menuitems()    
-    
+        self.add_default_menuitems()
+
     def get_date_info(self):
         today = datetime.datetime.now()
         day = today.day
@@ -176,11 +176,11 @@ class StarCalendarScreenlet(screenlets.Screenlet):
         else:
             days_in_month = 28
         #find the first day of the month
-        start_day = int(when.strftime("%u"))  
+        start_day = int(when.strftime("%u"))
         if start_day == 7:                # and do calculations on it...
-            start_day = 0   
+            start_day = 0
         start_day = start_day + 1
-    
+
         # return as array
         return [day, year, month_name, days_in_month, start_day,month_num]
 
@@ -189,9 +189,9 @@ class StarCalendarScreenlet(screenlets.Screenlet):
             self.__timeout = gobject.timeout_add(self.__dict__['update_interval']
                         * 1000, self.update)
         if self.__dict__['enable_buttons'] == True and not self.__buttons_timeout:
-            self.__buttons_timeout = gobject.timeout_add(100, 
+            self.__buttons_timeout = gobject.timeout_add(100,
                     self.update_buttons)
- 
+
     def on_unmap(self):
         if self.__timeout:
             gobject.source_remove(self.__timeout)
@@ -231,7 +231,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
     def init_buttons(self):
         if self.__buttons_pixmap:
             del self.__buttons_pixmap
-        self.__buttons_pixmap = gtk.gdk.Pixmap(self.window.window, int(self.width 
+        self.__buttons_pixmap = gtk.gdk.Pixmap(self.window.window, int(self.width
             * (2*self.scale)), int(self.height * (2*self.scale)), -1)
         ctx = self.__buttons_pixmap.cairo_create()
         self.clear_cairo_context(ctx)
@@ -290,17 +290,17 @@ class StarCalendarScreenlet(screenlets.Screenlet):
             self.redraw_canvas()
         if id=="icspath":
             self.show_edit_dialog()
-            
+
 
 
         if id == "mini":
             self.showevents = not self.showevents
             self.redraw_canvas()
-    
+
         if id=="update":
-            
+
             self.update()
-    
+
     def on_draw(self, ctx):
         # get data
         date = self.get_date_info() # [day, year, month_name, days_in_month, start_day]
@@ -316,10 +316,10 @@ class StarCalendarScreenlet(screenlets.Screenlet):
             #self.theme['date-border.svg'].render_cairo(ctx)
         # draw buttons and optionally the pressed one
         if self.p_layout == None :
-    
+
             self.p_layout = ctx.create_layout()
         else:
-        
+
             ctx.update_layout(self.p_layout)
         if self.__buttons_pixmap:
             ctx.save()
@@ -338,7 +338,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
                 ctx.set_source_pixmap(self.__buttons_pixmap, 0, -50 * 2* self.scale)
                 ctx.paint()
                 ctx.restore()
-                
+
         # draw the calendar foreground
         if self.theme:
             ctx.save()
@@ -351,10 +351,10 @@ class StarCalendarScreenlet(screenlets.Screenlet):
             self.p_layout.set_width((self.width - 10) * pango.SCALE)
             self.p_layout.set_markup('<b>' + date[2] + '</b>')
             ctx.set_source_rgba(*self.font_color)
-            
-            
+
+
             #ctx.show_layout(self.p_layout)
-        
+
             ctx.translate(-100,0)
             self.p_layout.set_width((self.width - 10) * pango.SCALE)
             self.p_layout.set_alignment(pango.ALIGN_RIGHT)
@@ -369,7 +369,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
             #self.theme['header-bg.svg'].render_cairo(ctx)  #draw the header background
             ctx.translate(6, 0)
             p_fdesc.set_size(4 * pango.SCALE)
-            self.p_layout.set_font_description(p_fdesc) 
+            self.p_layout.set_font_description(p_fdesc)
             #Draw header
             self.p_layout.set_alignment(pango.ALIGN_CENTER);
             self.p_layout.set_width(10*pango.SCALE);
@@ -384,7 +384,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
             p_fdesc.set_size(6 * pango.SCALE)
             p_fdesc.set_family_static("FreeSans")
 
-            self.p_layout.set_font_description(p_fdesc) 
+            self.p_layout.set_font_description(p_fdesc)
             # Draw the day labels
             ctx.restore()
             row = 1
@@ -405,19 +405,19 @@ class StarCalendarScreenlet(screenlets.Screenlet):
                     self.draw_rounded_rectangle(ctx,0,0,2,10,9)
                 if self.showevents == True:
                     for event in self.reader.events:
-                        
+
                         myevent = str(event.startDate)
                         myevent  = myevent[:myevent.find(' ')].strip()
-    
+
                         a = str(x +1)
                         if len(a) == 1:
                             a = '0' + a
-                    
+
                         if myevent == str(date[1]) + '-' + str(date[5])+ '-' + str(a) :
                             ctx.set_source_rgba(*self.event_color)
                             self.draw_rounded_rectangle(ctx,0,0,2,10,9)
                             if int(date[1]) >= int(self.today[:4]) or int(date[1]) >= int(self.today[:4]) and int(date[5]) >= int(self.today[5:7]) :
-                                
+
                                 self.event1 = self.event1 + '\n'+ str(date[1]) + '-' + str(date[5])+ '-' + str(a)+ ' - ' +str(event)
                         if myevent == datetime.datetime.now().strftime("%F") and self.__month_shift == 0 and int(x)+1 == int(date[0]) :
                             ctx.set_source_rgba(*self.today_event_color)
@@ -425,7 +425,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
 
                             self.event1 = self.event1 + '\n Today - '+ str(event)
                 self.p_layout.set_markup( str(x+1) )
-    
+
                 ctx.set_source_rgba(*self.font_color)
                 ctx.show_layout(self.p_layout)
                 if day == 7:
@@ -438,12 +438,12 @@ class StarCalendarScreenlet(screenlets.Screenlet):
         # create dialog
         dialog = gtk.Dialog("iCalendar ics path", self.window)
         dialog.resize(300, 100)
-        dialog.add_buttons(gtk.STOCK_OK, gtk.RESPONSE_OK, 
+        dialog.add_buttons(gtk.STOCK_OK, gtk.RESPONSE_OK,
             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
         entrybox = gtk.Entry()
         #entrybox.set_text(str(self.icalpath))
         dialog.vbox.add(entrybox)
-        entrybox.show()    
+        entrybox.show()
         # run dialog
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
@@ -456,7 +456,7 @@ class StarCalendarScreenlet(screenlets.Screenlet):
         ctx.rectangle(0,0,self.width,self.height)
         ctx.fill()
         self.on_draw(ctx)
-    
+
 
 if __name__ == "__main__":
     import screenlets.session
