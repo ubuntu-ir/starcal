@@ -12,7 +12,7 @@
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 #    Lesser General Public License for more details.
-# 
+#
 #    You should have received a copy of the GNU Lesser General Public
 #    License from http://www.gnu.org/licenses/lgpl.txt
 #    Or on Debian systems, from /usr/share/common-licenses/LGPL
@@ -309,7 +309,7 @@ class SimpleCal(qt.QWidget):
     #######
     painter.setPen(self.borderTextColor)
     for i in range(7):
-      painter.drawText(qc.QRectF(self.gx[i]-rtl*self.dx, 0, self.dx, self.topMargin), 
+      painter.drawText(qc.QRectF(self.gx[i]-rtl*self.dx, 0, self.dx, self.topMargin),
         qc.Qt.AlignCenter, self.getWeekDayName(i))
     for j in range(6):
       painter.drawText(qc.QRectF(self.gx[0]-(1-rtl)*self.leftMargin,
@@ -325,7 +325,7 @@ class SimpleCal(qt.QWidget):
           painter.setPen(self.holidayColor)
         else:
           painter.setPen(self.normDayColor)
-        painter.drawText(qc.QRectF(self.gx[i]-rtl*self.dx, self.gy[j], self.dx, self.dy), 
+        painter.drawText(qc.QRectF(self.gx[i]-rtl*self.dx, self.gy[j], self.dx, self.dy),
           qc.Qt.AlignCenter, qloc.toString(cell.date[2]))
     #######
     painter.end()
@@ -390,7 +390,7 @@ class SimpleCal(qt.QWidget):
     self.year = year
     self.month = month
     self.day = day
-    self.cal.repaint() 
+    self.cal.repaint()
   def selectToday(self):
     'select today in the SimpleCal widget'
     self.setDate(*core.getSysDate())

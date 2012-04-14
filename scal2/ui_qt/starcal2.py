@@ -8,7 +8,7 @@
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful, 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
@@ -207,7 +207,7 @@ class MonthLabel(qt.QLabel):
 
 
 class ArrowToolButton(qt.QToolButton):
-    def __init__(self, arrowType, parent=None): 
+    def __init__(self, arrowType, parent=None):
         qt.QToolButton.__init__(self, parent)
         self.setArrowType(arrowType)
     def event(self, ev):
@@ -219,7 +219,7 @@ class ArrowToolButton(qt.QToolButton):
         elif t in (qc.QEvent.HoverLeave, qc.QEvent.GraphicsSceneHoverLeave):
             self.emit(qc.SIGNAL('mouseLeave'))
         return qt.QToolButton.event(self, ev)
-        
+
 
 class IntLabel(qt.QLabel):## label_id is the same calendar mode for a year label
     itemsNum = 9
@@ -817,7 +817,7 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
                 self.yearLabel[i].setActive(y)
 
 
-    
+
 
 
 
@@ -1077,7 +1077,7 @@ class MainWin(qt.QMainWindow):
             else:
                 toolbar.addButton(tbItem, enable)
         self.toolbar = toolbar
-        
+
         """
         hbox = qt.QHBoxLayout()
         #print 'spacing', hbox.spacing()
@@ -1434,7 +1434,7 @@ class MainWin(qt.QMainWindow):
             if self.clock!=None:
                 self.clock.destroy()
                 self.clock = None
-    
+
     def updateTrayClock(self):
         if self.trayMode!=3:
             return

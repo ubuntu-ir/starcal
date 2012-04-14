@@ -81,7 +81,7 @@ class MultiSpinBox(qt.QAbstractSpinBox):
         self.widthChars = pos ## width of entry(lineedit) in chars
         ## self.set_width_chars(pos) #???????## GTK
         metrics=self.entry.fontMetrics() ## like metrics=qt.QFontMetrics(self.entry.font())
-        #print 'metrics', metrics.maxWidth(), metrics.charWidth(self.zero, 0) 
+        #print 'metrics', metrics.maxWidth(), metrics.charWidth(self.zero, 0)
         self.widthPix = metrics.charWidth(self.zero, 0) * pos + 25 ## ???????????
         ## self.widthPix = metrics.maxWidth()*pos
         self.setMinimumWidth(self.widthPix)
@@ -209,7 +209,7 @@ class MultiSpinBox(qt.QAbstractSpinBox):
             else:
                 [j, np] = nfound[0]
                 nums[j] = text[p:p2].strip()
-                nfound = []    
+                nfound = []
                 nums.append('')
             p = p2 + len(self.sep[i])
         if p2==-1:

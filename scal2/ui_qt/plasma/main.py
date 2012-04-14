@@ -8,7 +8,7 @@
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful, 
+# This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 # GNU General Public License for more details.
@@ -256,7 +256,7 @@ class StarCalApplet(MainWin):
 
 
 
- 
+
 class StarCalPlasmaApplet(PyKDE4.plasmascript.Applet):
     def __init__(self, parent, arg=None):
         PyKDE4.plasmascript.Applet.__init__(self, parent)
@@ -269,17 +269,17 @@ class StarCalPlasmaApplet(PyKDE4.plasmascript.Applet):
         self.layout.addItem(self.tbutton)
         self.sapplet = StarCalApplet(self)
         self.setHasConfigurationInterface(True)
-        self.setLayout(self.layout)                                
-        self.setAspectRatioMode(0) 
+        self.setLayout(self.layout)
+        self.setAspectRatioMode(0)
         ## 0: free size
         ## 1: square (ratio=1)
         ## 2: fixed ratio (of initial size)
         #print 'ui.traySize', ui.traySize
         self.resize(300, ui.traySize+50) ## how to calculate/estimate needed width
     def showConfigurationInterface(self):
-        self.sapplet.prefShow()    
+        self.sapplet.prefShow()
 
-        
+
 
 def CreateApplet(parent):
         return StarCalPlasmaApplet(parent)
