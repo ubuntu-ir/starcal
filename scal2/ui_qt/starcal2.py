@@ -978,35 +978,7 @@ class PluginsTextBox(qt.QTextBrowser, MainWinItem):
     def onDateChange(self):
         self.setText(ui.cell.pluginsText)
 
-class CustomDayWidget(HBox, MainWinItem):
-    def __init__(self, populatePopupFunc=None):
-        HBox.__init__(self)
-        self.textview = qt.QTextBrowser()
-        self.textview.setLineWrapMode(qt.QTextEdit.WidgetWidth)
-        self.textview.setWordWrapMode(qt.QTextOption.WordWrap)
-        self.textview.setReadOnly(True)
-        self.textview.setCursorWidth(0) ## ?????????? set_cursor_visible(False)
-        #self.textview.setAlignment(qc.Qt.AlignHCenter)## FIXME
-        self.addWidget(self.textview)
-        #if populatePopupFunc
-        #  self.textview.connect('populate-popup', populatePopupFunc)## FIXME
-        MainWinItem.__init__(self, 'customDayText', _('CustomDay Text'))
-    def fixHeight(self):
-        self.textview.document().setTextWidth(self.width())
-        h = self.textview.document().size().height()
-        self.textview.setMaximumHeight(h)
-    def setData(self, data):## {'type': type, 'desc':desc}
-        if data:
-            cd = ui.cell.customday
-            imgPath = '%s%s%s'%(ui.pixDir, os.sep, ui.customdayModes[data['type']][1])
-            self.textview.setText('<IMG>%s</IMG> %s'%(imgPath, data['desc']))
-            self.textview.show()
-            self.fixHeight()
-        else:
-            self.textview.setText('')## forethought
-            self.textview.hide()
-    def onDateChange(self):
-        self.setData(ui.cell.customday)
+## class EventViewMainWinItem(DayOccurrenceView, MainWinItem):## FIXME
 
 
 
@@ -1103,7 +1075,7 @@ class MainWin(qt.QMainWindow):
         self.setCentralWidget(self.vbox)
         ####################
         self.pluginsTextBox = PluginsTextBox()## self.populatePopup ## FIXME
-        self.customDayWidget = CustomDayWidget()## self.populatePopup ## FIXME
+        #self.eventDayView = EventViewMainWinItem(self.populatePopup)
         ####################
         defaultItems = [
             toolbar,
@@ -1111,7 +1083,7 @@ class MainWin(qt.QMainWindow):
             self.mcal,
             StatusBox(),
             self.pluginsTextBox,
-            self.customDayWidget
+            #self.eventDayView
         ]
         defaultItemsDict = dict([(obj._name, obj) for obj in defaultItems])
         self.items = []
@@ -1264,7 +1236,7 @@ class MainWin(qt.QMainWindow):
         elif k==qc.Qt.Key_F1:
             self.aboutShow()
         elif k in (qc.Qt.Key_Insert,qc.Qt.Key_Plus):# Insert or plus
-            self.showCustomDay(month=ui.cell.month, day=ui.cell.day)
+            self.eventManShow()
         elif k == qc.Qt.Key_Q:
             self.quit()
         #if Alt+F7: FIXME
@@ -1459,15 +1431,7 @@ class MainWin(qt.QMainWindow):
     aboutShow = lambda self, obj=None, data=None: self.about.show()## or run() #?????????
     prefShow = lambda self, obj=None, data=None: self.prefDialog.show()
     customizeShow = lambda self, obj=None, data=None: self.customizeDialog.show()
-    def showCustomDay(self, obj=None, data=None, month=None, day=None):## FIXME
-        if month==None:
-            month = ui.cell.month
-        if day==None:
-            day = ui.cell.day
-        self.customDay.set_month_day(month, day)
-        self.customDay.entryComment.set_text('')
-        self.customDay.entryComment.grab_focus()
-        self.customDay.show()
+    eventManShow = lambda self, obj=None, data=None: ui.eventManDialog ## .present()
     def trayInit(self):
         if self.trayMode==2:
             self.sysTray = qt.QSystemTrayIcon(self)

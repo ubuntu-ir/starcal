@@ -33,7 +33,7 @@ from scal2.locale_man import langDict
 from scal2.utils import toUnicode
 
 from scal2 import core
-from scal2.core import convert, myRaise, rootDir, pixDir, confDir, sysConfDir
+from scal2.core import convert, myRaise, rootDir, pixDir, confDir, sysConfDir, APP_DESC
 
 from scal2.format_time import compileTmFormat
 
@@ -165,9 +165,10 @@ toolbarItemsData = (
     ToolbarItem('date', 'date', 'selectDateShow', 'Select Date...', 'Date...'),
     ToolbarItem('customize', 'edit', 'customizeShow'),
     ToolbarItem('preferences', 'preferences', 'prefShow'),
+    ToolbarItem('add', 'add', 'eventManShow', 'Event Manager'),
     ToolbarItem('export', 'convert', 'exportClicked',  _('Export to %s')%'HTML'),
-    ToolbarItem('about', 'about', 'aboutShow', _('About ')+core.APP_DESC),
-    ToolbarItem('quit', 'quit', 'quit',)
+    ToolbarItem('about', 'about', 'aboutShow', _('About ')+APP_DESC),
+    ToolbarItem('quit', 'quit', 'quit'),
 )
 
 toolbarItemsDataDict = dict([(item.name, item) for item in toolbarItemsData])
@@ -452,6 +453,22 @@ class ModuleOptionItem():
         self.updateVar = lambda: setattr(self.module, self.var_name, self.get_value())
         self.updateWidget = lambda: self.set_value(getattr(self.module, self.var_name))
 
+
+## ('button', LABEL, CLICKED_MODULE_NAME, CLICKED_FUNCTION_NAME)
+class ModuleOptionButton:
+    def __init__(self, opt):
+        funcName = opt[2]
+        clickedFunc = getattr(__import__('scal2.ui_qt.%s'%opt[1], fromlist=[funcName]), funcName)
+        hbox = HBox()
+        button = qt.QPushButton(_(opt[0]))
+        button.connect(button, qc.SIGNAL('clicked()'), clickedFunc)
+        hbox.addWidget(button)
+        hbox.addStretch()
+        self.widget = hbox
+    def updateVar(self):
+        pass
+    def updateWidget(self):
+        pass
 
 class PrefItem():
     ## self.__init__, self.module, self.varName, self.widget
@@ -1659,7 +1676,14 @@ class PrefDialog(qt.QWidget):
         options = []
         for mod in core.modules:
             for opt in mod.options:
-                optl = ModuleOptionItem(mod, opt)
+                if opt[0]=='button':
+                    try:
+                        optl = ModuleOptionButton(opt[1:])
+                    except:
+                        myRaise()
+                        continue
+                else:
+                    optl = ModuleOptionItem(mod, opt)
                 options.append(optl)
                 vbox.addWidget(optl.widget)
         self.moduleOptions = options
@@ -1916,8 +1940,8 @@ class PrefDialog(qt.QWidget):
             #if self.trayMode==1:
             #    pass ##?????????????????????????????????????????????????
             #else:
-            result = qt.QMessageBox.question(self, _('Need Restart '+core.APP_DESC),
-                _('Some preferences need for restart %s to apply.'%core.APP_DESC),
+            result = qt.QMessageBox.question(self, _('Need Restart '+APP_DESC),
+                _('Some preferences need for restart %s to apply.'%APP_DESC),
                 _('_Restart'), _('_Cancel'), '', 0, 1)
             if result==0:
                 self.mainWin.restart()

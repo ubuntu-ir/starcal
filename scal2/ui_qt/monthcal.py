@@ -20,6 +20,7 @@
 from time import time
 import sys, os
 from os.path import join, isfile
+from math import pi, sqrt
 
 from scal2.locale_man import tr as _
 from scal2.locale_man import rtl, rtlSgn
@@ -111,7 +112,7 @@ class MonthCal(qt.QWidget, MainWinItem):
         self.shownCals = shownCals
         ## self.supports_alpha = ## ??????????
         #self.kTime = 0
-        self.customdayPixmaps = tuple([qt.QPixmap(item[1]) for item in ui.customdayModes])
+        #self.customdayPixmaps = tuple([qt.QPixmap(item.icon) for item in ui.eventTags])
         ######################
         ## Define drag and drop
         ######################
@@ -185,6 +186,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                 c = status[yPos][xPos]
                 x0 = self.cx[xPos]
                 y0 = self.cy[yPos]
+                cellInactive = (c.month != ui.cell.month)
                 cellHasCursor = (cursor and (xPos, yPos) == selectedCellPos)
                 if cellHasCursor:
                     ##### Drawing Cursor
@@ -224,12 +226,38 @@ class MonthCal(qt.QWidget, MainWinItem):
                         painter.drawPath(path)
                         ##if round_oval:##???????
                         ##### end of Drawing Cursor
-                    if c.customday!=None and ui.customdayShowIcon:
-                        ## right buttom corner ?????????????????????
-                        pix = qt.QPixmap(join(pixDir, ui.customdayModes[c.customday['type']][1]))
-                        painter.drawPixmap(self.cx[xPos]+self.dx/2.0-pix.width(),# right side
-                                           self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
-                                           self.customdayPixmaps[c.customday['type']])
+                    #if c.customday!=None and ui.customdayShowIcon:
+                    #    ## right buttom corner ?????????????????????
+                    #    pix = qt.QPixmap(join(pixDir, ui.customdayModes[c.customday['type']][1]))
+                    #    painter.drawPixmap(self.cx[xPos]+self.dx/2.0-pix.width(),# right side
+                    #                       self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
+                    #                       self.customdayPixmaps[c.customday['type']])
+
+                ######## end of Drawing Cursor
+                if not cellInactive:
+                    iconList = []
+                    for item in c.eventsData:
+                        icon = item['icon']
+                        if icon and not icon in iconList:
+                            iconList.append(icon)
+                    if iconList:
+                        iconsN = len(iconList)
+                        scaleFact = 1.0 / sqrt(iconsN)
+                        fromRight = 0
+                        for index, icon in enumerate(iconList):
+                            pix = qt.QPixmap(icon)
+                            pix_w = pix.width()
+                            pix_h = pix.height()
+                            fromRight += pix_w
+                            ## right buttom corner ?????????????????????
+                            source = qc.QRectF(0, 0, pix_w, pix_h)
+                            target = qc.QRectF(
+                                self.cx[xPos] + self.dx/2.0,
+                                self.cy[yPos] + self.dy/2.0 - fromRight*scaleFact,
+                                pix_w*scaleFact,
+                                pix_h*scaleFact,
+                            )
+                            painter.drawPixmap (target, pix, source)
                 item = shown[0]
                 if item['enable']:
                     mode = item['mode']
