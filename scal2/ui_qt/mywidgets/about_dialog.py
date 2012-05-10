@@ -20,7 +20,7 @@
 from scal2.utils import toUnicode
 from scal2.locale_man import tr as _
 
-from scal2.ui import openUrl
+from scal2 import core
 
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
@@ -86,7 +86,7 @@ class AboutDialog(qt.QWidget):
             label.setTextInteractionFlags(qc.Qt.LinksAccessibleByMouse | qc.Qt.LinksAccessibleByKeyboard)
             label.setAlignment(qc.Qt.AlignHCenter)
             label.setLayoutDirection(qc.Qt.LeftToRight)
-            self.connect(label, qc.SIGNAL('linkActivated(const QString&)'), openUrl)
+            self.connect(label, qc.SIGNAL('linkActivated(const QString&)'), core.openUrl)
             vbox.addWidget(label, qc.Qt.AlignHCenter)
         bbox = qt.QHBoxLayout()
         bbox.setMargin(0)
