@@ -1639,7 +1639,7 @@ class MainWin(qt.QMainWindow):
 ################# end of function and class defenitions ########################
 
 
-## gtk.link_button_set_uri_hook(ui.openUrl) FIXME ?????????????
+## gtk.link_button_set_uri_hook(core.openUrl) FIXME ?????????????
 
 ## Maybe this file be imported from plasma applet file
 def main():
