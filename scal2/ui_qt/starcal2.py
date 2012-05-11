@@ -42,8 +42,10 @@ if not isdir(confDir):
 
 from scal2.utils import toUnicode
 from scal2 import core
-from scal2.locale_man import rtl, lang, loadTranslator ## import scal2.locale_man after core
-_ = loadTranslator(True)## FIXME
+
+from scal2 import locale_man
+from scal2.locale_man import rtl ## import scal2.locale_man after core
+_ = locale_man.loadTranslator(True)## FIXME
 #from scal2.locale_man import tr as _
 
 from scal2.core import convert, getMonthName, getMonthLen, getNextMonth, getPrevMonth
@@ -100,9 +102,6 @@ if unity.needToAdd():
         unity.addAndRestart()
     dialog.destroy()
 
-#os.environ['LANG'] = core.lang
-#import gettext
-#gettext.textdomain(core.APP_NAME)
 
 #core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
 core.COMMAND = 'starcal2-qt'
@@ -169,8 +168,8 @@ class MonthLabel(qt.QLabel):
         ## (Performance) update menu here, or make menu entirly before popup ????????????????
         #assert 0<=active<12
         self.setText(getMonthName(self.mode, active+1))
-        if core.lang!='':
-            self.setToolTip(core.modules[self.mode].getMonthName(active+1)) ### No translate
+        if not locale_man.langSh in ('', 'en'):
+            self.setToolTip(core.modules[self.mode].getMonthName(active+1)) ## not translation
         self.active = active
         self.show()
     def changeMode(self, mode):
@@ -1601,6 +1600,7 @@ class MainWin(qt.QMainWindow):
         qc.QCoreApplication.quit()
     def restart(self):
         self.quit()
+        os.environ['LANG'] = locale_man.sysLangDefault
         restart()
     def adjustTime(self, widget=None, event=None):
         Popen(preferences.adjustTimeCmd)
