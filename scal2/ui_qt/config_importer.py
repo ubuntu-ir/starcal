@@ -125,3 +125,6 @@ vboxL.addWidget(bbox)
 
 win.exec_()
 
+if not os.path.isdir(confDir):
+    os.mkdir(confDir, 0755)
+
