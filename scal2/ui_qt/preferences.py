@@ -1497,7 +1497,7 @@ class PrefDialog(qt.QWidget):
         label = qt.QLabel(_('Left Margin')+':')
         label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
         hbox.addWidget(label)
-        item = SpinPrefItem(ui, 'calLeftMargin', 0, 99, 0, 1, 10)
+        item = SpinPrefItem(ui, 'mcalLeftMargin', 0, 99, 0, 1, 10)
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
         ####
@@ -1505,7 +1505,7 @@ class PrefDialog(qt.QWidget):
         label = qt.QLabel(_('Top')+':')
         label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
         hbox.addWidget(label)
-        item = SpinPrefItem(ui, 'calTopMargin', 0, 99, 0, 1, 10)
+        item = SpinPrefItem(ui, 'mcalTopMargin', 0, 99, 0, 1, 10)
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
         hbox.addStretch()
