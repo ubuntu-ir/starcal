@@ -136,42 +136,42 @@ class MonthCal(qt.QWidget, MainWinItem):
         #####
         status = getCurrentMonthStatus()
         #################################### Drawing Border
-        if ui.calTopMargin>0:
+        if ui.mcalTopMargin>0:
             ##### Drawing border top background
             ##menuBgColor == borderColor ##???????????????
             painter.setBrush(qt.QColor(*ui.borderColor))
-            painter.drawRect(0, 0, w, ui.calTopMargin)
+            painter.drawRect(0, 0, w, ui.mcalTopMargin)
             ######## Drawing weekDays names
             painter.setPen(qt.QColor(*ui.borderTextColor))
             dx = 0
             wdayAb = (self.wdaysWidth > w)
             for i in xrange(7):
-                painter.drawText(self.cx[i]-self.dx/2.0, 0, self.dx, ui.calTopMargin,
+                painter.drawText(self.cx[i]-self.dx/2.0, 0, self.dx, ui.mcalTopMargin,
                                  qc.Qt.AlignCenter, core.getWeekDayAuto(i, wdayAb))
             ######## Drawing "Menu" label
             painter.setPen(qt.QColor(*ui.menuTextColor))
             painter.drawText(
-                w - ui.calLeftMargin if rtl else 0,
+                w - ui.mcalLeftMargin if rtl else 0,
                 0,
-                ui.calLeftMargin,
-                ui.calTopMargin,
+                ui.mcalLeftMargin,
+                ui.mcalTopMargin,
                 qc.Qt.AlignCenter,
                 _('Menu')
             )
-        if ui.calLeftMargin>0:
+        if ui.mcalLeftMargin>0:
             ##### Drawing border left background
             painter.setBrush(qt.QColor(*ui.borderColor))
             if rtl:
-                painter.drawRect(w-ui.calLeftMargin, ui.calTopMargin, ui.calLeftMargin, h-ui.calTopMargin)
+                painter.drawRect(w-ui.mcalLeftMargin, ui.mcalTopMargin, ui.mcalLeftMargin, h-ui.mcalTopMargin)
             else:
-                painter.drawRect(0, ui.calTopMargin, ui.calLeftMargin, h-ui.calTopMargin)
+                painter.drawRect(0, ui.mcalTopMargin, ui.mcalLeftMargin, h-ui.mcalTopMargin)
             ##### Drawing week numbers
             painter.setPen(qt.QColor(*ui.borderTextColor))
             for i in xrange(6):
                 painter.drawText(
-                    w - ui.calLeftMargin if rtl else 0,
+                    w - ui.mcalLeftMargin if rtl else 0,
                     self.cy[i]-self.dy/2.0,
-                    ui.calLeftMargin,
+                    ui.mcalLeftMargin,
                     self.dy,
                     qc.Qt.AlignCenter,
                     _(status.weekNum[i])
@@ -350,22 +350,22 @@ class MonthCal(qt.QWidget, MainWinItem):
             #print w,
             if w > wm:
                 wm = w
-        self.wdaysWidth = wm*7 + ui.calLeftMargin
+        self.wdaysWidth = wm*7 + ui.mcalLeftMargin
         #print 'max =', wm, '     wdaysWidth =', self.wdaysWidth
     def calcCoord(self):## calculates coordidates (x and y of cells centers)
         w = self.width()
         h = self.height()
         if rtl:
-            self.cx = [ (w-ui.calLeftMargin)*(13.0-2*i)/14.0 \
+            self.cx = [ (w-ui.mcalLeftMargin)*(13.0-2*i)/14.0 \
                                  for i in xrange(7) ] ## centers x
         else:
-            self.cx = [ui.calLeftMargin \
-                                 + (w-ui.calLeftMargin)*(1.0+2*i)/14.0 \
+            self.cx = [ui.mcalLeftMargin \
+                                 + (w-ui.mcalLeftMargin)*(1.0+2*i)/14.0 \
                                  for i in xrange(7) ] ## centers x
-        self.cy = [ui.calTopMargin + (h-ui.calTopMargin)*(1.0+2*i)/12.0 \
+        self.cy = [ui.mcalTopMargin + (h-ui.mcalTopMargin)*(1.0+2*i)/12.0 \
                              for i in xrange(6) ] ## centers y
-        self.dx = (w-ui.calLeftMargin)/7.0 ## delta x
-        self.dy = (h-ui.calTopMargin)/6.0 ## delta y
+        self.dx = (w-ui.mcalLeftMargin)/7.0 ## delta x
+        self.dy = (h-ui.mcalTopMargin)/6.0 ## delta y
     def keyPressEvent(self, event):
         k = event.key()
         print time(), 'MonthCal.keyPressEvent', k, hex(k)
@@ -460,11 +460,11 @@ class MonthCal(qt.QWidget, MainWinItem):
                                int(self.cy[ui.cell.monthPos[1]] + self.dy/2.0))
     def getMainMenuPos(self):#???????????????????
         if rtl:
-            return (int(self.width() - ui.calLeftMargin/2.0),
-                    int(ui.calTopMargin/2.0))
+            return (int(self.width() - ui.mcalLeftMargin/2.0),
+                    int(ui.mcalTopMargin/2.0))
         else:
-            return (int(ui.calLeftMargin/2.0),
-                    int(ui.calTopMargin/2.0))
+            return (int(ui.mcalLeftMargin/2.0),
+                    int(ui.mcalTopMargin/2.0))
     def onDateChange(self):
         self.update()## equivalent of self.queue_draw() in GTK
     def onConfigChange(self):
