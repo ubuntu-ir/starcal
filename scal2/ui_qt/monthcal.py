@@ -79,8 +79,8 @@ class MonthCal(qt.QWidget, MainWinItem):
     def heightSpinChanged(self, value):## FIXME
         h = int(value)
         self.setFixedHeight(h)
-        ui.calHeight = h
-    confStr = lambda self: 'ui.calHeight=%r\n'%ui.calHeight
+        ui.mcalHeight = h
+    confStr = lambda self: 'ui.mcalHeight=%r\n'%ui.mcalHeight
     getDate = lambda self: (ui.cell.year, ui.cell.month, ui.cell.day)
     def setDate(self, date):
         (ui.cell.year, ui.cell.month, ui.cell.day) = date
@@ -100,12 +100,12 @@ class MonthCal(qt.QWidget, MainWinItem):
         spin.setRange(1, 999)
         spin.setSingleStep(1)
         spin.setLayoutDirection(qc.Qt.LeftToRight)
-        spin.setValue(ui.calHeight)
+        spin.setValue(ui.mcalHeight)
         self.connect(spin, qc.SIGNAL('valueChanged (int)'), self.heightSpinChanged)
-        hbox.addWidget(qt.QLabel(_('Height:')))
+        hbox.addWidget(qt.QLabel(_('Height')))
         hbox.addWidget(spin)
         MainWinItem.__init__(self, 'monthCal', _('Month Calendar'), optionsWidget=hbox)
-        self.setFixedHeight(ui.calHeight)
+        self.setFixedHeight(ui.mcalHeight)
         self.setSizePolicy(qt.QSizePolicy.Expanding, qt.QSizePolicy.Fixed)
         ######################
         self.shownCals = shownCals
@@ -475,7 +475,7 @@ class MonthCal(qt.QWidget, MainWinItem):
 if __name__=='__main__':
     app = qt.QApplication(sys.argv)
     w = MonthCal()
-    #w.resize(ui.winWidth, ui.calHeight)
+    #w.resize(ui.winWidth, ui.mcalHeight)
     w.show()
     sys.exit(app.exec_())
 

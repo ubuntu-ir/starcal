@@ -1494,7 +1494,7 @@ class PrefDialog(qt.QWidget):
         hbox.addWidget(self.ymArrowHboxW)
         """
         #########
-        label = qt.QLabel(_('Left Margin')+':')
+        label = qt.QLabel(_('Left Margin'))
         label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
         hbox.addWidget(label)
         item = SpinPrefItem(ui, 'mcalLeftMargin', 0, 99, 0, 1, 10)
@@ -1502,7 +1502,7 @@ class PrefDialog(qt.QWidget):
         hbox.addWidget(item.widget)
         ####
         hbox.addStretch()
-        label = qt.QLabel(_('Top')+':')
+        label = qt.QLabel(_('Top'))
         label.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
         hbox.addWidget(label)
         item = SpinPrefItem(ui, 'mcalTopMargin', 0, 99, 0, 1, 10)
@@ -1567,7 +1567,7 @@ class PrefDialog(qt.QWidget):
         #############
         item = RadioHListPrefItem(ui, 'dragIconCell',
             (_('Date String'), _('Cell Image')),
-            _('Drag & Drop Icon:'))
+            _('Drag & Drop Icon'))
         self.uiPrefItems.append(item)
         item.radios[0].setToolTip('yyyy/mm/dd')
         item.set(0)
@@ -1633,7 +1633,7 @@ class PrefDialog(qt.QWidget):
         #########
         hbox = qt.QHBoxLayout()
         hbox.setMargin(0)
-        hbox.addWidget(newFixedLabel(_('Holidays:')+'    '))
+        hbox.addWidget(newFixedLabel(_('Holidays')+'    '))
         item = WeekDayCheckListPrefItem(core, 'holidayWeekDays')
         self.corePrefItems.append(item)
         self.holiWDItem = item ## Holiday Week Days Item
@@ -1642,7 +1642,7 @@ class PrefDialog(qt.QWidget):
         #########
         hbox = qt.QHBoxLayout()
         hbox.setMargin(0)
-        hbox.addWidget(newFixedLabel(_('First week of year containts:')))
+        hbox.addWidget(newFixedLabel(_('First week of year containts')))
         combo = qt.QComboBox()
         texts = []
         texts = [_('First %s of year')%name for name in core.weekDayName]+[_('First day of year')]
