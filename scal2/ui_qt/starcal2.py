@@ -555,7 +555,7 @@ class CustomizableToolbar(qt.QToolBar, MainWinItem):
         ###
         hbox = qt.QHBoxLayout()
         hbox.setMargin(0)
-        hbox.addWidget(qt.QLabel(_('Style:')))
+        hbox.addWidget(qt.QLabel(_('Style')))
         self.styleCombo = qt.QComboBox()
         for item in self.styleList:
             self.styleCombo.addItem(_(item))
@@ -568,7 +568,7 @@ class CustomizableToolbar(qt.QToolBar, MainWinItem):
         ###
         hbox = qt.QHBoxLayout()
         hbox.setMargin(0)
-        self.iconSizeLabel = qt.QLabel(_('Icon Size:'))
+        self.iconSizeLabel = qt.QLabel(_('Icon Size'))
         hbox.addWidget(self.iconSizeLabel)
         self.iconSizeSpin = qt.QSpinBox()
         self.iconSizeSpin.setRange(2, 64)
