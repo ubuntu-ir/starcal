@@ -1629,7 +1629,6 @@ class MainWin(qt.QMainWindow):
         self.onDateChange()
     updateConfigLater = lambda self: qc.QTimer.singleShot(100, self.onConfigChange)
     def show(self, update_flags=False):
-        #self.onDateChange()
         if update_flags:
             self.setWindowFlags(self.getMyWindowFlags())
         self.updateConfigLater()
