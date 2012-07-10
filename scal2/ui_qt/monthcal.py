@@ -174,7 +174,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                     ui.mcalLeftMargin,
                     self.dy,
                     qc.Qt.AlignCenter,
-                    _(status.weekNum[i])
+                    _(status[i].weekNum)
                 )
         cursor = True ## FIXME
         quad = 90 ## 90*16
