@@ -1347,7 +1347,7 @@ class PrefDialog(qt.QWidget):
         hbox = qt.QHBoxLayout()
         hbox.setMargin(0)
         ########
-        item = CheckPrefItem(ui, 'calGrid', _('Grid'))
+        item = CheckPrefItem(ui, 'mcalGrid', _('Grid'))
         self.uiPrefItems.append(item)
         item.widget.setSizePolicy(qt.QSizePolicy.Fixed, qt.QSizePolicy.Fixed)
         hbox.addWidget(item.widget)
