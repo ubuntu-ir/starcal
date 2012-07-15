@@ -74,34 +74,6 @@ from scal2.ui_qt.customize import CustomizableWidgetWrapper, MainWinItem, Custom
 from scal2.ui_qt.monthcal import MonthCal, qfontEncode
 
 
-from scal2 import unity
-
-if unity.needToAdd():
-    dialog = qt.QDialog()
-    dialog.setWindowTitle('Tray Icon')
-    vboxL = qt.QVBoxLayout()
-    vboxL.setMargin(0)
-    dialog.setLayout(vboxL)
-    label = qt.QLabel(_(unity.addAndRestartText))
-    label.setWordWrap(True)
-    vboxL.addWidget(label)
-    ###
-    bbox = qt.QDialogButtonBox(dialog)
-    okB = bbox.addButton(qt.QDialogButtonBox.Ok)
-    cancelB = bbox.addButton(qt.QDialogButtonBox.Cancel)
-    if ui.autoLocale:
-        okB.setText(_('_OK'))
-        #okB.set_image(gtk.image_new_from_stock(gtk.STOCK_OK, gtk.ICON_SIZE_BUTTON))
-        cancelB.setText(_('_Cancel'))
-        #cancelB.set_image(gtk.image_new_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON))
-    dialog.connect(bbox, qc.SIGNAL('rejected()'), lambda: dialog.reject())
-    dialog.connect(bbox, qc.SIGNAL('accepted()'), lambda: dialog.accept())
-    vboxL.addWidget(bbox)
-    ###
-    if dialog.exec_()==qt.QDialog.Accepted:
-        unity.addAndRestart()
-    dialog.destroy()
-
 
 #core.COMMAND = sys.argv[0] ## OR __file__ ## ????????
 core.COMMAND = 'starcal2-qt'
