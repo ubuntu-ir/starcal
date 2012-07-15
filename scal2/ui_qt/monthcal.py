@@ -111,7 +111,6 @@ class MonthCal(qt.QWidget, MainWinItem):
         self.shownCals = shownCals
         ## self.supports_alpha = ## ??????????
         #self.kTime = 0
-        self.customdayPixmaps = tuple([qt.QPixmap(item[1]) for item in ui.customdayModes])
         ######################
         ## Define drag and drop
         ######################
@@ -185,6 +184,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                 c = status[yPos][xPos]
                 x0 = self.cx[xPos]
                 y0 = self.cy[yPos]
+                cellInactive = (c.month != ui.cell.month)
                 cellHasCursor = (cursor and (xPos, yPos) == selectedCellPos)
                 if cellHasCursor:
                     ##### Drawing Cursor
@@ -223,13 +223,16 @@ class MonthCal(qt.QWidget, MainWinItem):
                         ####
                         painter.drawPath(path)
                         ##if round_oval:##???????
-                        ##### end of Drawing Cursor
-                    if c.customday!=None and ui.customdayShowIcon:
-                        ## right buttom corner ?????????????????????
-                        pix = qt.QPixmap(join(pixDir, ui.customdayModes[c.customday['type']][1]))
-                        painter.drawPixmap(self.cx[xPos]+self.dx/2.0-pix.width(),# right side
-                                           self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
-                                           self.customdayPixmaps[c.customday['type']])
+                ##### end of Drawing Cursor
+                '''
+                if not cellInactive:
+                    ## right buttom corner ?????????????????????
+                    targetRect = QRectF()
+                    pix = qt.QPixmap(join(pixDir, ui.customdayModes[c.customday['type']][1]))
+                    painter.drawPixmap(self.cx[xPos]+self.dx/2.0-pix.width(),# right side
+                                       self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
+                                       self.customdayPixmaps[c.customday['type']])
+                '''
                 item = shown[0]
                 if item['enable']:
                     mode = item['mode']
@@ -239,7 +242,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                     fontw = met.maxWidth() * len(num)
                     fonth = met.height()
                     painter.setFont(qfont)
-                    if c.month!=ui.cell.month:
+                    if not cellInactive:
                         painter.setPen(qt.QColor(*ui.inactiveColor))
                     elif c.holiday:
                         painter.setPen(qt.QColor(*ui.holidayColor))
@@ -251,7 +254,7 @@ class MonthCal(qt.QWidget, MainWinItem):
                                      fonth,
                                      qc.Qt.AlignCenter,
                                      num)
-                if c.month==ui.cell.month:
+                if not cellInactive:
                     for item in shown[1:]:
                         if item['enable']:
                             mode = item['mode']
