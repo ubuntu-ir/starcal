@@ -1,4 +1,3 @@
-#!/usr/bin/python2.4
 #
 # Copyright (C) 2010 Google Inc.
 #
