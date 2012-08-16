@@ -1666,7 +1666,7 @@ class PrefDialog(qt.QWidget):
         ##########################
         widgetAdv = qt.QWidget()
         widgetAdv.setLayout(vbox)
-        ################################ Tab 4 (Manage Plugins) ############################################
+        ################################ Tab 4 (Plugins) ############################################
         #'''
         vbox = qt.QVBoxLayout()
         vbox.setMargin(0)
@@ -1704,12 +1704,12 @@ class PrefDialog(qt.QWidget):
         """
         notebook.addTab(widgetGen, qt.QIcon('%s/preferences-other.png'%pixDir), _('_General'))
         notebook.addTab(widgetApp, qt.QIcon('%s/preferences-desktop-theme.png'%pixDir), _('A_ppearance'))
-        notebook.addTab(widgetPlug, qt.QIcon('%s/preferences-plugin.png'%pixDir), _('_Manage Plugin'))
+        notebook.addTab(widgetPlug, qt.QIcon('%s/preferences-plugin.png'%pixDir), _('_Plugins'))
         notebook.addTab(widgetAdv, qt.QIcon('%s/applications-system.png'%pixDir), _('A_dvanced'))
         ##########
         #notebook.addTab(widgetGen, _('_General'))
         #notebook.addTab(widgetApp, _('A_ppearance'))
-        #notebook.addTab(widgetPlug, _('_Manage Plugin'))
+        #notebook.addTab(widgetPlug, _('_Plugins'))
         #notebook.addTab(widgetAdv, _('A_dvanced'))
         ########################
         vboxAll = qt.QVBoxLayout()
