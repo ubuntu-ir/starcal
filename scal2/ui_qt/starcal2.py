@@ -1624,6 +1624,7 @@ def main():
         psyco.full()
         print('Using module "psyco" to speed up execution.')
         psyco_found=True'''
+    ui.init()
     trayMode=2
     if len(sys.argv)>1:
         if sys.argv[1]=='--no-tray': ## to tray icon
