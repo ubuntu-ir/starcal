@@ -50,7 +50,7 @@ _ = locale_man.loadTranslator(True)## FIXME
 
 from scal2.core import convert, getMonthName, getMonthLen, getNextMonth, getPrevMonth
 
-core.showInfo()
+#core.showInfo()
 
 from scal2 import ui
 from scal2.ui import showYmArrows
@@ -1227,7 +1227,7 @@ class MainWin(qt.QMainWindow):
         self.onDateChange()
     def keyPressEvent(self, event):
         k = event.key()
-        print time(), 'MainWin.keyPressEvent', k, hex(k)
+        #print time(), 'MainWin.keyPressEvent', k, hex(k)
         ## file:///usr/share/doc/python-qt4-doc/html/qt.html#Key-enum
         ## file:///usr/share/doc/python-qt4-doc/html/qkeyevent.html
         if k==qc.Qt.Key_Escape:
