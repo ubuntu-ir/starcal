@@ -22,8 +22,7 @@ import time
 #print time.time(), __file__
 
 import sys, os
-from os.path import dirname
-from os.path import join as join
+from os.path import dirname, join, isabs
 
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
@@ -537,7 +536,7 @@ class ComboImageTextPrefItem(PrefItem):
         if imPath=='':
             self.widget.addItem(label)
         else:
-            if not imPath.startswith(os.sep):
+            if not isabs(imPath):
                 imPath = join(pixDir, imPath)
             self.widget.addItem(qt.QIcon(imPath), label)
 
@@ -557,7 +556,7 @@ class LangPrefItem(PrefItem):
         if imPath=='':
             self.widget.addItem(label)
         else:
-            if not imPath.startswith(os.sep):
+            if not isabs(imPath):
                 imPath = join(pixDir, imPath)
             self.widget.addItem(qt.QIcon(imPath), label)
     def get(self):
