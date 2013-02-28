@@ -24,9 +24,6 @@ import time
 import sys, os
 from os.path import dirname, join, isabs
 
-from PyQt4 import QtGui as qt
-from PyQt4 import QtCore as qc
-
 from scal2.locale_man import tr as _
 from scal2.locale_man import langDict
 from scal2.utils import toUnicode
@@ -38,7 +35,12 @@ from scal2.format_time import compileTmFormat
 
 from scal2 import ui
 
+from PyQt4 import QtGui as qt
+from PyQt4 import QtCore as qc
 
+from scal2.ui_qt.font_utils import *
+from scal2.ui_qt.drawing import *
+from scal2.ui_qt import qt_ud as ud
 #from scal2.ui_qt.monthcal import calcTextWidth
 from scal2.ui_qt.mywidgets import HBox, VBox
 from scal2.ui_qt.mywidgets.expander import Expander
@@ -50,44 +52,6 @@ qpixDir = join(rootDir, 'pixmaps_qt')
 QVar = qc.QVariant
 
 
-
-
-
-qfontDecode = lambda qfont: (str(qfont.family()), qfont.bold(), qfont.italic(),
-                                                         qfont.pointSize())
-
-qfontEncode = lambda font: qt.QFont(font[0], font[3],
-                            qt.QFont.Bold if font[1] else qt.QFont.Normal,
-                            font[2])
-
-
-
-def fontToStr(font):
-    s = font[0]
-    if font[1]:
-        s += ' Bold'
-    if font[2]:
-        s += ' Italic'
-    return s + ' %s'%font[3]
-
-
-def qfontToStr(qfont):
-    s = qfont.family()
-    if qfont.bold():
-        s += ' Bold'
-    if qfont.italic():
-        s += ' Italic'
-    return s + ' %s'%qfont.pointSize()
-
-
-
-def calcTextWidth(text, widget):
-    n = len(text)
-    met = widget.fontMetrics() ## OR app.fontMetrics()
-    w = 0
-    for i in range(n):
-        w += met.charWidth(text, i)
-    return w
 
 
 
@@ -108,29 +72,6 @@ def newFixedLabel(text):
 
 ############################################################
 
-ui.fontDefault = qfontDecode(qt.QApplication.font())
-if not ui.fontCustom:
-    ui.fontCustom = ui.fontDefault
-
-if ui.shownCals[0]['font']==None:
-    ui.shownCals[0]['font'] = ui.fontDefault
-
-(name, bold, underline, size) = ui.fontDefault
-for item in ui.shownCals[1:]:
-    if item['font']==None:
-        item['font'] = (name, bold, underline, int(size*0.6))
-del name, bold, underline, size
-
-############################################################
-
-
-#print settings.get_property('gtk-timeout-initial')## 200
-#print settings.get_property('gtk-timeout-repeat')## 20
-#settings.set_property('gtk-timeout-repeat', 100)##???????????????? Dosn't affect!!
-
-
-#if not fontUseDefault:##????????????????
-#    settings.set_property('gtk-font-name', fontCustom)
 
 dateFormat = '%Y/%m/%d'
 clockFormat = '%X' ## '%T' or '%X' (local) or '<b>%T</b>' (bold) or '%m:%d' (no seconds)
@@ -1913,13 +1854,19 @@ class PrefDialog(qt.QWidget):
         """
         if ui.checkNeedRestart():
             #if self.trayMode==1:
-            #    pass ##?????????????????????????????????????????????????
+            #    pass ## FIXME
             #else:
-            result = qt.QMessageBox.question(self, _('Need Restart '+core.APP_DESC),
+            if qt.QMessageBox.question(
+                self,
+                _('Need Restart '+core.APP_DESC),
                 _('Some preferences need for restart %s to apply.'%core.APP_DESC),
-                _('_Restart'), _('_Cancel'), '', 0, 1)
-            if result==0:
-                self.mainWin.restart()
+                _('_Restart'),
+                _('_Cancel'),
+                '',
+                0,
+                1,
+            ) == 0:
+                core.restart()
     def updatePrefGui(self):############### Updating Pref Gui (NOT MAIN GUI)
         for opt in self.moduleOptions:
             opt.updateWidget()

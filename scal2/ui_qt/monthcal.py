@@ -33,44 +33,10 @@ from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
 from PyQt4 import QtGui as qt
 from PyQt4 import QtCore as qc
 
+from scal2.ui_qt.font_utils import *
+from scal2.ui_qt.drawing import *
 from scal2.ui_qt.mywidgets import HBox, VBox
 from scal2.ui_qt.customize import MainWinItem
-
-qfontDecode = lambda qfont: (
-    str(qfont.family()),
-    qfont.bold(),
-    qfont.italic(),
-    qfont.pointSize()
-)
-
-qfontEncode = lambda font: qt.QFont(
-    font[0],
-    font[3],
-    qt.QFont.Bold if font[1] else qt.QFont.Normal,
-    font[2]
-)
-
-
-def calcTextWidth(text, font=None):
-    if isinstance(text, str):
-        text = text.decode('utf-8')
-    if font==None:
-        qfont = qfontEncode(ui.getFont())
-    elif isinstance(font, tuple):
-        qfont = qfontEncode(font)
-    else:
-        qfont = font
-    n = len(text)
-    met = qt.QFontMetrics(font) ## OR met = widget.fontMetrics()
-    w = 0
-    for i in range(n):
-        w += met.charWidth(text, i)
-    return w
-
-
-## def newTextLayout(widget, text='', font=None): ????????
-
-
 
 
 
@@ -84,17 +50,9 @@ class MonthCal(qt.QWidget, MainWinItem):
     getDate = lambda self: (ui.cell.year, ui.cell.month, ui.cell.day)
     def setDate(self, date):
         (ui.cell.year, ui.cell.month, ui.cell.day) = date
-    def __init__(self, shownCals=ui.shownCals, parent=None):
+    def __init__(self, parent=None):
         qt.QWidget.__init__(self, parent)
         #####################
-        if shownCals[0]['font']==None:
-            shownCals[0]['font'] = ui.fontDefault
-        (name, bold, underline, size) = ui.fontDefault
-        for item in shownCals[1:]:
-            if item['font']==None:
-                item['font'] = (name, bold, underline, int(size*0.6))
-        del name, bold, underline, size
-        #########################
         hbox = HBox()
         spin = qt.QSpinBox()
         spin.setRange(1, 999)
@@ -108,7 +66,6 @@ class MonthCal(qt.QWidget, MainWinItem):
         self.setFixedHeight(ui.mcalHeight)
         self.setSizePolicy(qt.QSizePolicy.Expanding, qt.QSizePolicy.Fixed)
         ######################
-        self.shownCals = shownCals
         ## self.supports_alpha = ## ??????????
         #self.kTime = 0
         ######################
@@ -178,7 +135,6 @@ class MonthCal(qt.QWidget, MainWinItem):
         cursor = True ## FIXME
         quad = 90 ## 90*16
         selectedCellPos = ui.cell.monthPos
-        shown = self.shownCals
         for yPos in xrange(6):
             for xPos in xrange(7):
                 c = status[yPos][xPos]
@@ -233,11 +189,11 @@ class MonthCal(qt.QWidget, MainWinItem):
                                        self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
                                        self.customdayPixmaps[c.customday['type']])
                 '''
-                item = shown[0]
-                if item['enable']:
-                    mode = item['mode']
+                params = ui.mcalTypeParams[0]
+                if params['enable']:
+                    mode = core.primaryMode
                     num = _(c.dates[mode][2], mode)
-                    qfont = qfontEncode(item['font'])
+                    qfont = qfontEncode(params['font'])
                     met = qt.QFontMetrics(qfont)
                     fontw = met.maxWidth() * len(num)
                     fonth = met.height()
@@ -247,30 +203,33 @@ class MonthCal(qt.QWidget, MainWinItem):
                     elif c.holiday:
                         painter.setPen(qt.QColor(*ui.holidayColor))
                     else:
-                        painter.setPen(qt.QColor(*item['color']))
-                    painter.drawText(x0 - fontw/2.0 + item['x'],
-                                     y0 - fonth/2.0 + item['y'],
-                                     fontw,
-                                     fonth,
-                                     qc.Qt.AlignCenter,
-                                     num)
+                        painter.setPen(qt.QColor(*params['color']))
+                    painter.drawText(
+                        x0 - fontw/2.0 + params['x'],
+                        y0 - fonth/2.0 + params['y'],
+                        fontw,
+                        fonth,
+                        qc.Qt.AlignCenter,
+                        num,
+                    )
                 if not cellInactive:
-                    for item in shown[1:]:
-                        if item['enable']:
-                            mode = item['mode']
+                    for mode, params in ui.getMcalMinorTypeParams()[1:]:
+                        if params['enable']:
                             num = _(c.dates[mode][2], mode)
-                            qfont = qfontEncode(item['font'])
+                            qfont = qfontEncode(params['font'])
                             met = qt.QFontMetrics(qfont)
                             fontw = met.maxWidth() * len(num)
                             fonth = met.height()
                             painter.setFont(qfont)
-                            painter.setPen(qt.QColor(*item['color']))
-                            painter.drawText(x0 - fontw/2.0 + item['x'],
-                                             y0 - fonth/2.0 + item['y'],
-                                             fontw,
-                                             fonth,
-                                             qc.Qt.AlignCenter,
-                                             num)
+                            painter.setPen(qt.QColor(*params['color']))
+                            painter.drawText(
+                                x0 - fontw/2.0 + params['x'],
+                                y0 - fonth/2.0 + params['y'],
+                                fontw,
+                                fonth,
+                                qc.Qt.AlignCenter,
+                                num,
+                            )
                     if cellHasCursor:
                         ##### Drawing Cursor Outline
                         d = ui.cursorD
