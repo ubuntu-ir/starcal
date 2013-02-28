@@ -31,14 +31,14 @@ from subprocess import Popen
 
 sys.path.insert(0, dirname(dirname(dirname(__file__))))
 from scal2.paths import *
-from scal2.utils import myRaise, restart
+from scal2.utils import myRaise, restartLow
 
 if not isdir(confDir):
     try:
         __import__('scal2.ui_qt.config_importer')
     except:
         myRaise()
-    restart()
+    restartLow()
 
 from scal2.utils import toUnicode
 from scal2 import core
@@ -1570,10 +1570,6 @@ class MainWin(qt.QMainWindow):
     def quit(self, widget=None, event=None):
         ui.saveLiveConf()
         qc.QCoreApplication.quit()
-    def restart(self):
-        self.quit()
-        os.environ['LANG'] = locale_man.sysLangDefault
-        restart()
     def adjustTime(self, widget=None, event=None):
         Popen(preferences.adjustTimeCmd)
     exportClicked = lambda self: self.export.showDialog(ui.cell.year, ui.cell.month)
