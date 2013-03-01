@@ -1300,17 +1300,20 @@ class PrefDialog(qt.QWidget):
                                  lambda: item.widget.setEnabled(cbGrid.checkState()==qc.Qt.Checked))
         ########
         hbox.addStretch()
-        item = CheckPrefItem(ui, 'fontUseDefault', _('Use system font'), fontToStr(ui.fontDefault))
+        item = CheckPrefItem(ui, 'fontCustomEnable', _('Application font'), fontToStr(ui.fontDefault))
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
-        fontDefItem = item
+        enableItem = item
         item = FontPrefItem(ui, 'fontCustom')
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
         #hbox.addStretch()
         #self.connect(item.widget, qc.SIGNAL('clicked'), self.checkbFontClicked)
-        self.connect(item.widget, qc.SIGNAL('clicked()'),
-                            lambda: item.widget.setEnabled(not fontDefItem.get()))
+        self.connect(
+            item.widget,
+            qc.SIGNAL('clicked()'),
+            lambda: item.widget.setEnabled(enableItem.get())
+        )
         vbox.addLayout(hbox)
         ########################### Theme #####################
         item = CheckPrefItem(ui, 'bgUseDesk', _('Use Desktop Background'))
