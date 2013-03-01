@@ -223,7 +223,7 @@ class StarCalApplet(MainWin):
             self.iconT.setFixedWidth(w)
             #self.iconT.setFixedHeight(h)
             ## position of left lower corner of text ^^
-            ## trayTextColor, ui.trayFont, ui.fontUseDefault ??????
+            ## trayTextColor, ui.trayFont, ui.fontCustomEnable ??????
             ####################
             wd = core.getWeekDay(*ddate)
             tt = core.getWeekDayN(wd)
