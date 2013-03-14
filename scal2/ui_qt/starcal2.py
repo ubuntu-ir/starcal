@@ -807,7 +807,7 @@ class StatusBox(qt.QStatusBar, MainWinItem): ## FIXME
         for item in shownCals:
             if item['enable']:
                 mode = item['mode']
-                text += (' ' + ui.cell.format(preferences.dateBinFmt, mode))
+                text += (' ' + ui.cell.format(preferences.dateFormatBin, mode))
         met = app.fontMetrics()
         count = (self.width() - met.width(text))//(met.width(' ')*(n+1))
         text = text.replace(' ', ' '*count)
@@ -1387,9 +1387,9 @@ class MainWin(qt.QMainWindow):
         self.menuTray2Width = t2size.width()
         self.menuTray2Height = t2size.height()
     def copyDate(self, obj=None, event=None):
-        self.clipboard.setText(ui.cell.format(preferences.dateBinFmt, core.primaryMode))
+        self.clipboard.setText(ui.cell.format(preferences.dateFormatBin, core.primaryMode))
     def copyDateToday(self, obj=None, event=None):
-        self.clipboard.setText(ui.todayCell.format(preferences.dateBinFmt, core.primaryMode))
+        self.clipboard.setText(ui.todayCell.format(preferences.dateFormatBin, core.primaryMode))
     def copyTime(self, obj=None, event=None):
         self.clipboard.setText(ui.todayCell.format(preferences.clockFormatBin, core.primaryMode, localtime()[3:6]))
     """
