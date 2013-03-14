@@ -76,7 +76,7 @@ def newFixedLabel(text):
 dateFormat = '%Y/%m/%d'
 clockFormat = '%X' ## '%T' or '%X' (local) or '<b>%T</b>' (bold) or '%m:%d' (no seconds)
 
-dateBinFmt = compileTmFormat(dateFormat)
+dateFormatBin = compileTmFormat(dateFormat)
 clockFormatBin = compileTmFormat(clockFormat)
 
 adjustTimeCmd = ''
