@@ -159,16 +159,15 @@ class MonthLabel(qt.QLabel):
         self.emit(qc.SIGNAL('changed'), self, item)
     def mousePressEvent(self, event):
         #print 'starcal_qt: mousePressEvent'
-        global focusTime
         button = event.button()
         #if button!=qc.Qt.RightButton:
         #    event.ignore()
         #    return
         x = event.globalX() - self.menuWidth/2 ## center
         y = event.globalY() - (self.active+0.5)*self.menuHeight/12
-        focusTime = time()
         self.menu.setActiveAction(self.actions[self.active])
         self.menu.popup(qc.QPoint(x, y))
+        ui.updateFocusTime()
         event.accept()
     def onConfigChange(self):
         self.menuWidth = self.menu.sizeHint().width()
@@ -1291,8 +1290,8 @@ class MainWin(qt.QMainWindow):
     def mousePressEvent(self, event):
         b = event.button()
         if b==qc.Qt.RightButton:
-            ui.focusTime = time()
             self.menuMain.popup(event.globalPos())
+            ui.updateFocusTime()
             #self.endManualMoving()
             event.accept()
         elif b==qc.Qt.LeftButton:
@@ -1343,21 +1342,21 @@ class MainWin(qt.QMainWindow):
             except AttributeError:
                 pass
     def popupMenuCell(self, x, y):
-        ui.focusTime = time()
         p = self.mcal.mapToGlobal(qc.QPoint(x, y))
         x = p.x()
         y = p.y()
         if rtl:
             x -= self.menuCellWidth
         self.menuCell.popup(qc.QPoint(x, y))
+        ui.updateFocusTime()
     def popupMenuMain(self, x, y):
-        ui.focusTime = time()
         p = self.mcal.mapToGlobal(qc.QPoint(x, y))
         x = p.x()
         y = p.y()
         if rtl:
             x -= self.menuMainWidth
         self.menuMain.popup(qc.QPoint(x, y))
+        ui.updateFocusTime()
     def prefUpdateBgColor(self, cal):
         self.prefDialog.colorbBg.set_color(ui.bgColor)
     def keepAboveClicked(self):
@@ -1449,7 +1448,6 @@ class MainWin(qt.QMainWindow):
     def trayPopup(self):
         if self.sysTray == None:
             return
-        #core.focusTime = time()    ## needed?????
         r = self.sysTray.geometry()
         x = r.x()
         y = r.y()
@@ -1481,6 +1479,7 @@ class MainWin(qt.QMainWindow):
             mx = x
             my = y
         menu.popup(qc.QPoint(mx, my))
+        ui.updateFocusTime()
     def trayUpdate(self, gdate=None, checkDate=True):
         if self.trayMode<2:
             return
