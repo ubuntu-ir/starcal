@@ -30,7 +30,7 @@ from time import time, localtime
 from subprocess import Popen
 
 sys.path.insert(0, dirname(dirname(dirname(__file__))))
-from scal2.paths import *
+from scal2.path import *
 from scal2.utils import myRaise, restartLow
 
 if not isdir(confDir):
