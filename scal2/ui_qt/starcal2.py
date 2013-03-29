@@ -48,7 +48,7 @@ from scal2.locale_man import rtl ## import scal2.locale_man after core
 _ = locale_man.loadTranslator(True)## FIXME
 #from scal2.locale_man import tr as _
 
-from scal2.core import convert, getMonthName, getMonthLen, getNextMonth, getPrevMonth
+from scal2.core import convert, getMonthName, getMonthLen
 
 #core.showInfo()
 

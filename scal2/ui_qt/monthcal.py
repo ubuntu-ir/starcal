@@ -25,7 +25,7 @@ from scal2.locale_man import tr as _
 from scal2.locale_man import rtl, rtlSgn
 
 from scal2 import core
-from scal2.core import myRaise, getMonthName, getMonthLen, getNextMonth, getPrevMonth, pixDir
+from scal2.core import myRaise, getMonthLen, pixDir
 
 from scal2 import ui
 from scal2.monthcal import getMonthStatus, getCurrentMonthStatus
@@ -328,6 +328,9 @@ class MonthCal(qt.QWidget, MainWinItem):
                              for i in xrange(6) ] ## centers y
         self.dx = (w-ui.mcalLeftMargin)/7.0 ## delta x
         self.dy = (h-ui.mcalTopMargin)/6.0 ## delta y
+    def monthPlus(self, p):
+        ui.monthPlus(p)
+        self.onDateChange()
     def keyPressEvent(self, event):
         k = event.key()
         print time(), 'MonthCal.keyPressEvent', k, hex(k)
@@ -352,11 +355,9 @@ class MonthCal(qt.QWidget, MainWinItem):
         elif k==qc.Qt.Key_End:
             self.changeDate(ui.cell.year, ui.cell.month, getMonthLen(ui.cell.year, ui.cell.month, core.primaryMode))
         elif k==qc.Qt.Key_PageUp:
-            (year, month) = getPrevMonth(ui.cell.year, ui.cell.month)
-            self.changeDate(year, month, ui.cell.day)
+            self.monthPlus(-1)
         elif k==qc.Qt.Key_PageDown:
-            (year, month) = getNextMonth(ui.cell.year, ui.cell.month)
-            self.changeDate(year, month, ui.cell.day)
+            self.monthPlus(1)
         elif k==qc.Qt.Key_Menu:# Simulate right click (key beside Right-Ctrl)
             self.emit(qc.SIGNAL('popup-menu-cell'), *self.getCellPos())
         elif k in (qc.Qt.Key_F10, qc.Qt.Key_M):
