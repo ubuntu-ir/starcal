@@ -77,7 +77,7 @@ class ExtDateEdit(qt.QWidget):
   def _popupToggled(self, checked):
     'private, should not call by the programmer'
     if checked:
-      (x0, y0) = getAbsPos(self.popupButton)
+      x0, y0 = getAbsPos(self.popupButton)
       x = x0 + self.popupButton.width() - self.scal.width()
       y = y0 + self.popupButton.height()
       self.popup.move(x, y)
@@ -91,7 +91,7 @@ class ExtDateEdit(qt.QWidget):
       self.popup.hide()
     else:
       self.scal.setDate(*self.datebox.getDate())
-      (x0, y0) = getAbsPos(self.popupButton)
+      x0, y0 = getAbsPos(self.popupButton)
       if x0<0:
         x0 = 0
       if y0<0:

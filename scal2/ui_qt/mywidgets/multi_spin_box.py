@@ -300,12 +300,12 @@ class TimeBox(MultiSpinBox):
         self.getTime = self.getNums
     setTime = lambda self, h, m=0, s=0: self.setNums((h, m, s))
     def getSeconds(self):
-        (h, m, s) = self.getTime()
+        h, m, s = self.getTime()
         return h*3600 + m*60 + s
     def setSeconds(self, seconds):
-        (day, s) = divmod(seconds, 86400) ## do what with "day" ?????
-        (h, s) = divmod(s, 3600)
-        (m, s) = divmod(s, 60)
+        day, s = divmod(seconds, 86400) ## do what with "day" ?????
+        h, s = divmod(s, 3600)
+        m, s = divmod(s, 60)
         self.setTime(h, m, s)
         ##return day
 

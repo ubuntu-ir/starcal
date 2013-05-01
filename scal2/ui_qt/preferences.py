@@ -239,7 +239,7 @@ class ColorButton(qt.QPushButton):
             self.setToolTip('(%d, %d, %d)'%(qcolor.red(), qcolor.green(), qcolor.blue()))
     def onClick(self):
         if self.useAlpha:
-            (n, ok) = qt.QColorDialog.getRgba(self.qcolor.rgba(), self)
+            n, ok = qt.QColorDialog.getRgba(self.qcolor.rgba(), self)
             if ok:
                 c = qt.QColor()
                 c.setRgba(n)
@@ -254,7 +254,7 @@ class ColorButton(qt.QPushButton):
             w = size.width() - 12
             h = size.height() - 12
         else:
-            (w, h) = self.useFixedSize
+            w, h = self.useFixedSize
         self.pmap = newColorPixmap(self.qcolor, w, h)
         self.setIcon(qt.QIcon(self.pmap))
         self.setIconSize(qc.QSize(w, h))#"""
@@ -975,7 +975,7 @@ class PluginTreeview(qt.QTreeWidget):
     def add(self):
         ## ???????????????????????????
         ## Reize window to show all texts
-        #(r, x, y, w, h) = self.plugAddTreev.get_column(0).cell_get_size()
+        #r, x, y, w, h = self.plugAddTreev.get_column(0).cell_get_size()
         #print r[2], r[3], x, y, w, h
         #self.plugAddDialog.resize(w+30, 75 + 30*len(self.plugAddModel))
         ###############

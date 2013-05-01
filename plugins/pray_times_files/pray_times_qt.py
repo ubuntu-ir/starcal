@@ -73,7 +73,7 @@ class LocationDialog(qt.QDialog):
                 continue
             if p[0]=='':
                 if p[1]=='':
-                    (city, lat, lng) = p[2:5]
+                    city, lat, lng = p[2:5]
                     #if country=='Iran':
                     #    print city
                     if len(p)>4:
@@ -216,7 +216,7 @@ class LocationDialog(qt.QDialog):
                 lng = 0
             else:
                 j = int(self.topLevelItem(i).text(0))
-                (name, lname, lat, lng) = self.cityData[j]
+                name, lname, lat, lng = self.cityData[j]
             self.entry_edit_name.setText(lname)
             self.spin_lat.setValue(lat)
             self.spin_lng.setValue(lng)
@@ -265,7 +265,7 @@ class LocationButton(qt.QPushButton):
     def onClicked(self):
         res = self.dialog.run()
         if res:
-            (self.locName, self.lat, self.lng) = res
+            self.locName, self.lat, self.lng = res
             self.setText(toUnicode(self.locName))
 
 

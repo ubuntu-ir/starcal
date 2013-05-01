@@ -121,10 +121,10 @@ class ExportDialog(qt.QFileDialog):
                 months.append(getMonthStatus(ui.cell.year, i))
             title = '%s %s'%(_('Calendar'), _(ui.cell.year))
         elif i==2:
-            (y0, m0) = self.ymBox0.getYM()
-            (y1, m1) = self.ymBox1.getYM()
+            y0, m0 = self.ymBox0.getYM()
+            y1, m1 = self.ymBox1.getYM()
             for ym in xrange(y0*12+m0-1, y1*12+m1):
-                (y, m) = divmod(ym, 12)
+                y, m = divmod(ym, 12)
                 m += 1
                 months.append(getMonthStatus(y, m))
             title = _('Calendar')

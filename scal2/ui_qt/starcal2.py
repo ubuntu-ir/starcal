@@ -694,13 +694,13 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
     #def arrowRelease(self, widget):
     def yearLabelChange(self, ylabel, year):
         mode = ylabel.label_id
-        (p_year, p_month, p_day) = ui.cell.dates[mode]
+        p_year, p_month, p_day = ui.cell.dates[mode]
         ui.changeDate(*convert(year, p_month, p_day, mode, core.primaryMode))
         self.onDateChange()
         self.emit(qc.SIGNAL('date-change'), self)
     def monthLabelChange(self, mlabel, item):
         #print 'monthLabelChange', item, mlabel.mode
-        (p_year, p_month, p_day) = ui.cell.dates[mlabel.mode]
+        p_year, p_month, p_day = ui.cell.dates[mlabel.mode]
         ui.changeDate(*convert(p_year, item+1, p_day, mlabel.mode, core.primaryMode))
         self.onDateChange()
         self.emit(qc.SIGNAL('date-change'), self)
@@ -782,7 +782,7 @@ class YearMonthLabelBox(HBox, MainWinItem): ## FIXME
     def onDateChange(self):
         for (i, item) in enumerate(ui.shownCals):
             if item['enable']:
-                (y, m, d) = ui.cell.dates[item['mode']]
+                y, m, d = ui.cell.dates[item['mode']]
                 self.monthLabel[i].setActive(m-1)
                 self.yearLabel[i].setActive(y)
 
@@ -1308,7 +1308,7 @@ class MainWin(qt.QMainWindow):
     """
     def startResize(self, widget, event):
         self.menuMain.hide()
-        (x, y, mask) = rootWindow.get_pointer()
+        x, y, mask = rootWindow.get_pointer()
         self.begin_resize_drag(gdk.WINDOW_EDGE_SOUTH_EAST, event.button, x, y, event.time)
         return True
     """
@@ -1520,7 +1520,7 @@ class MainWin(qt.QMainWindow):
                 if item['enable']:
                     mode = item['mode']
                     module = core.modules[mode]
-                    (y, m, d) = ui.todayCell.dates[mode]
+                    y, m, d = ui.todayCell.dates[mode]
                     tt += u'%s%s %s %s'%(sep, _(d), getMonthName(mode, m, y), _(y))
             if ui.pluginsTextTray:
                 text = toUnicode(ui.todayCell.pluginsText.replace('\t', '\n'))
@@ -1573,7 +1573,7 @@ class MainWin(qt.QMainWindow):
         Popen(preferences.adjustTimeCmd)
     exportClicked = lambda self: self.export.showDialog(ui.cell.year, ui.cell.month)
     def exportClickedTray(self, widget=None, event=None):
-        (y, m) = core.getSysDate()[:2]
+        y, m = core.getSysDate()[:2]
         self.export.showDialog(y, m)
     def onConfigChange(self):
         ## apply ui.winTaskbar ## need to restart ro be applie? FIXME

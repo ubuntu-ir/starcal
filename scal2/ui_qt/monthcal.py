@@ -49,7 +49,7 @@ class MonthCal(qt.QWidget, MainWinItem):
     confStr = lambda self: 'ui.mcalHeight=%r\n'%ui.mcalHeight
     getDate = lambda self: (ui.cell.year, ui.cell.month, ui.cell.day)
     def setDate(self, date):
-        (ui.cell.year, ui.cell.month, ui.cell.day) = date
+        ui.cell.year, ui.cell.month, ui.cell.day = date
     def __init__(self, parent=None):
         qt.QWidget.__init__(self, parent)
         #####################

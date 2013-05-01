@@ -152,7 +152,7 @@ class CustomizeDialog(qt.QWidget):## QDialog
         self.connect(closeB, qc.SIGNAL('clicked()'), self.closeEvent)
         self.vbox.addWidget(bbox)
     def itemChanged(self, qItem, column_index):## enableCellToggled
-        (index, parentIndex) = self.getSelectedIndex()
+        index, parentIndex = self.getSelectedIndex()
         item = self.getItemByIndex(index, parentIndex)
         item.enable = (qItem.checkState(0)==qc.Qt.Checked)
         item.widget.setVisible(item.enable)
@@ -176,7 +176,7 @@ class CustomizeDialog(qt.QWidget):## QDialog
         qIndex = qIndexes[0]
         return (qIndex.row(), qIndex.parent().row())
     def treevCursorChanged(self, selected, deselected):
-        (index, parentIndex) = self.getSelectedIndex()
+        index, parentIndex = self.getSelectedIndex()
         if index==-1:
             return
         #print 'treevCursorChanged', index, parentIndex
@@ -187,7 +187,7 @@ class CustomizeDialog(qt.QWidget):## QDialog
         else:
             self.optionBox.setCurrentWidget(self.nullWidget)
     def upClicked(self):
-        (index, parentIndex) = self.getSelectedIndex()
+        index, parentIndex = self.getSelectedIndex()
         if index==-1:
             return
         #print 'upClicked', index, parentIndex
@@ -208,7 +208,7 @@ class CustomizeDialog(qt.QWidget):## QDialog
             qRootItem.insertChild(index-1, qItem)
             self.tree.setCurrentItem(qItem)
     def downClicked(self):
-        (index, parentIndex) = self.getSelectedIndex()
+        index, parentIndex = self.getSelectedIndex()
         if index==-1:
             return
         #print 'upClicked', index, parentIndex
