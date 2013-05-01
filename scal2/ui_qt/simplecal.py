@@ -131,7 +131,7 @@ class SimpleCal(qt.QWidget):
         else:
           c.gray = 0
           c.date = (year, month, day)
-        (cyear, cmonth, cday) = c.date
+        cyear, cmonth, cday = c.date
         if c.gray==0:
           wd = (core.firstWeekDay + j) % 7 ##??????????
           if wd in self.holidayWeekDays:
@@ -174,7 +174,7 @@ class SimpleCal(qt.QWidget):
         status = self.months[(self.year, self.month)]
       except KeyError:
         status = self.buildStatus(self.year, self.month)
-    (sx, sy) = divmod(status.monthStartOffset + self.day - 1, 7)
+    sx, sy = divmod(status.monthStartOffset + self.day - 1, 7)
     self.cell = status[sx][sy]
     assert self.cell.date == (self.year, self.month, self.day)
     return status
@@ -186,7 +186,7 @@ class SimpleCal(qt.QWidget):
     if mode is None:
         mode = core.primaryMode
     self.mode = mode
-    (y, m, d) = core.getSysDate()
+    y, m, d = core.getSysDate()
     self.year = y
     self.month = m
     self.day = d
@@ -294,7 +294,7 @@ class SimpleCal(qt.QWidget):
     for y in self.gy:
       painter.drawLine(0, y, w, y)
     #######
-    (sx, sy) = self.cell.pos
+    sx, sy = self.cell.pos
     if self.cursorBgColor!=None:
       painter.setBrush(self.cursorBgColor)
       painter.setPen(qt.QPen(qt.QBrush(self.cursorBgColor), 0, qc.Qt.SolidLine, qc.Qt.RoundCap))

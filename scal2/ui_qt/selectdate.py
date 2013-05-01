@@ -180,7 +180,7 @@ class SelectDateDialog(qt.QWidget):
         mode = self.comboMode.currentIndex()
         if mode!=ui.dragGetMode:
             date = convert(date[0], date[1], date[2], ui.dragGetMode, mode)
-        (y, m, d) = date
+        y, m, d = date
         self.spinY.setValue(y)
         self.comboMonth.setCurrentIndex(m-1)
         self.spinD.setValue(d)
@@ -190,7 +190,7 @@ class SelectDateDialog(qt.QWidget):
     def show(self):
         ## Show a window that ask the date and set on the calendar
         mode = core.primaryMode
-        (y, m, d) = ui.cell.dates[mode]
+        y, m, d = ui.cell.dates[mode]
         self.setMode(mode)
         self.set(y, m, d)
         qt.QWidget.show(self)
@@ -219,10 +219,10 @@ class SelectDateDialog(qt.QWidget):
         pDate = self.get()
         module = core.modules[mode]
         if pDate==None:
-            (y, m, d) = ui.cell.dates[mode]
+            y, m, d = ui.cell.dates[mode]
         else:
-            (y0, m0, d0) = pDate
-            (y, m, d) = convert(y0, m0, d0, pMode, mode)
+            y0, m0, d0 = pDate
+            y, m, d = convert(y0, m0, d0, pMode, mode)
         combo = self.comboMonth
         self.disconnect(combo, qc.SIGNAL('currentIndexChanged(int)'), self.comboMonthChanged)
         combo.clear()
@@ -257,11 +257,11 @@ class SelectDateDialog(qt.QWidget):
         get = self.get()
         if get==None:
             return
-        (y0, m0, d0) = get
+        y0, m0, d0 = get
         if mode==core.primaryMode:
-            (y, m, d) = (y0, m0, d0)
+            y, m, d = (y0, m0, d0)
         else:
-            (y, m, d) = convert(y0, m0, d0, mode, core.primaryMode)
+            y, m, d = convert(y0, m0, d0, mode, core.primaryMode)
         if not core.validDate(mode, y, m, d):
             print 'bad date: %s'%dateStr(mode, y, m, d)
             return

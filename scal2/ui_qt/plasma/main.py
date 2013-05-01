@@ -234,7 +234,7 @@ class StarCalApplet(MainWin):
             for item in ui.shownCals:
                 if item['enable']:
                     mode = item['mode']
-                    (y, m, d) = ui.todayCell.dates[mode]
+                    y, m, d = ui.todayCell.dates[mode]
                     tt += u'%s%s %s %s'%(sep, _(d), core.getMonthName(mode, m), _(y))
             if ui.pluginsTextTray:
                 text = ui.todayCell.pluginsText
