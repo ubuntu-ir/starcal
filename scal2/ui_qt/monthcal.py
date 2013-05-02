@@ -293,7 +293,7 @@ class MonthCal(qt.QWidget, MainWinItem):
 
         ##### drawGrid
         if ui.mcalGrid:
-            painter.setBrush(qt.QColor(*ui.gridColor))
+            painter.setBrush(qt.QColor(*ui.mcalGridColor))
             for i in xrange(7):
                 painter.drawRect(self.cx[i]+rtlSgn()*self.dx/2.0, 0, 1, h)
             for i in xrange(6):

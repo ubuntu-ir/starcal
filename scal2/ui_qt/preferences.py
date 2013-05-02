@@ -1293,7 +1293,7 @@ class PrefDialog(qt.QWidget):
         hbox.addWidget(item.widget)
         cbGrid = item.widget
         ########
-        item = ColorPrefItem(ui, 'gridColor', True)
+        item = ColorPrefItem(ui, 'mcalGridColor', True)
         self.uiPrefItems.append(item)
         hbox.addWidget(item.widget)
         self.connect(cbGrid, qc.SIGNAL('clicked()'),
