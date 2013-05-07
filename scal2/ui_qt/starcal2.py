@@ -35,7 +35,7 @@ from scal2.utils import myRaise, restartLow
 
 if not isdir(confDir):
     try:
-        __import__('scal2.ui_qt.config_importer')
+        __import__('scal2.ui_qt.import_config_1to2')
     except:
         myRaise()
     restartLow()
