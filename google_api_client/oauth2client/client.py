@@ -60,7 +60,7 @@ except ImportError:
 
 from os.path import join
 
-os.sep=='/':
+if os.sep=='/':
     homeDir = os.getenv('HOME')
     cacheDir = join(homeDir, '.cache')
 else:
