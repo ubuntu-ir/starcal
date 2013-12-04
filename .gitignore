@@ -17,3 +17,4 @@ debian
 *.spec
 *.pkg.tar.xz
 PKGBUILD
+ui_gtk
