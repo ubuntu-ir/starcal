@@ -20,6 +20,7 @@
 from time import time as now
 import sys, os
 from os.path import join, isfile
+from math import pi, sqrt
 
 from scal2.locale_man import tr as _
 from scal2.locale_man import rtl, rtlSgn
@@ -189,6 +190,30 @@ class MonthCal(qt.QWidget, MainWinItem):
                                        self.cy[yPos]+self.dy/2.0-pix.height(),# buttom side
                                        self.customdayPixmaps[c.customday['type']])
                 '''
+                if not cellInactive:
+                    iconList = []
+                    for item in c.eventsData:
+                        icon = item['icon']
+                        if icon and not icon in iconList:
+                            iconList.append(icon)
+                    if iconList:
+                        iconsN = len(iconList)
+                        scaleFact = 1.0 / sqrt(iconsN)
+                        fromRight = 0
+                        for index, icon in enumerate(iconList):
+                            pix = qt.QPixmap(icon)
+                            pix_w = pix.width()
+                            pix_h = pix.height()
+                            fromRight += pix_w
+                            ## right buttom corner ?????????????????????
+                            source = qc.QRectF(0, 0, pix_w, pix_h)
+                            target = qc.QRectF(
+                                self.cx[xPos] + self.dx/2.0,
+                                self.cy[yPos] + self.dy/2.0 - fromRight*scaleFact,
+                                pix_w*scaleFact,
+                                pix_h*scaleFact,
+                            )
+                            painter.drawPixmap (target, pix, source)
                 params = ui.mcalTypeParams[0]
                 if params['enable']:
                     mode = core.primaryMode
