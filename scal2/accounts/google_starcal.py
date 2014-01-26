@@ -360,7 +360,7 @@ class GoogleAccount(Account):
             orderBy='updated',
         ).execute()
         return eventsRes.get('items', [])
-    def sync(self, group, remoteGroupId, resPerPage=50):
+    def sync(self, group, remoteGroupId, resPerPage=1000):
         ## if remoteGroupId=='tasks':## FIXME
         ##     service = self.getTasksService()
         service = self.getCalendarService()
