@@ -18,6 +18,7 @@ developerKey = 'AI39si4QJ0bmdZJd7nVz0j3zuo1JYS3WUJX8y0f2mvGteDtiKY8TUSzTsY4oAcGl
 
 import sys
 from os.path import splitext
+from time import time as now
 import socket
 import BaseHTTPServer
 
@@ -38,6 +39,7 @@ sys.path.append(join(rootDir, 'google-api-python-client'))## FIXME
 
 from apiclient.discovery import build
 from apiclient.http import HttpRequest
+from apiclient.errors import HttpError
 
 from oauth2client.file import Storage
 from oauth2client.client import OAuth2WebServerFlow
@@ -119,9 +121,7 @@ def exportEvent(event):
 
 
 def importEvent(gevent, group):
-    if gevent['status'] != 'confirmed':## FIXME
-        return
-    open('/tmp/gevent.js', 'a').write('%s\n\n'%pformat(gevent))
+    #open('/tmp/gevent.js', 'a').write('%s\n\n'%pformat(gevent))
     icsData = [
         ('DTSTART', encodeIcsStartEnd(gevent['start'])),
         ('DTEND', encodeIcsStartEnd(gevent['end'])),
@@ -241,6 +241,12 @@ class GoogleAccount(Account):
     askVerificationCode = lambda self: raw_input('Enter verification code: ').strip()
     def showError(self, error):
         sys.stderr.write(error+'\n')
+    def showHttpException(self, e):
+        self.showError(
+            _('HTTP Error') + '\n' +
+            _('Error Code') + ': ' + _(e.resp.status) + '\n' +
+            _('Error Message') + ': ' + _(e._get_reason().strip())
+        )
     def authenticate(self):
         global auth_local_webserver
         storage = Storage(self.authFile)
@@ -275,19 +281,19 @@ class GoogleAccount(Account):
         if auth_local_webserver:
             httpd.handle_request()
             if 'error' in httpd.query_params:
-                self.showError('Authentication request was rejected.')
+                self.showError(_('Authentication request was rejected.'))
                 return
             if 'code' in httpd.query_params:
                 code = httpd.query_params['code']
             else:
-                self.showError('Failed to find "code" in the query parameters of the redirect.')
+                self.showError(_('Failed to find "code" in the query parameters of the redirect.'))
                 return
         else:
             code = self.askVerificationCode()
         try:
             credential = self.flow.step2_exchange(code)
         except Exception as e:
-            self.showError('Authentication has failed: %s'%e)
+            self.showError(_('Authentication has failed')+':\n%s'%e)
             return
         storage.put(credential)
         credential.set_store(storage)
@@ -297,28 +303,45 @@ class GoogleAccount(Account):
         if not credentials:
             return False
         return credentials.authorize(httplib2.Http())
-    getCalendarService = lambda self: build(
-        serviceName='calendar',
-        version='v3',
-        http=self.getHttp(),
-        developerKey=developerKey,
-    )
-    getTasksService = lambda self: build(
-        serviceName='tasks',
-        version='v1',
-        http=self.getHttp(),
-        developerKey=developerKey,
-    )
-    addNewGroup = lambda self, title: self.getCalendarService().calendars().insert(
-        body={
-            'kind': 'calendar#calendar',
-            'summary': title,
-        }
-    ).execute()['id']
+    def getCalendarService(self):
+        try:
+            return build(
+                serviceName='calendar',
+                version='v3',
+                http=self.getHttp(),
+                developerKey=developerKey,
+            )
+        except HttpError as e:
+            self.showHttpException(e)
+    def getTasksService(self):
+        try:
+            return build(
+                serviceName='tasks',
+                version='v1',
+                http=self.getHttp(),
+                developerKey=developerKey,
+            )
+        except HttpError as e:
+            self.showHttpException(e)
+    def addNewGroup(self, title):
+        service = self.getCalendarService()
+        if not service:
+            return
+        service.calendars().insert(
+            body={
+                'kind': 'calendar#calendar',
+                'summary': title,
+            }
+        ).execute()['id']
     def deleteGroup(self, remoteGroupId):
-        self.getCalendarService().calendars().delete(calendarId=remoteGroupId).execute()
+        service = self.getCalendarService()
+        if not service:
+            return
+        service.calendars().delete(calendarId=remoteGroupId).execute()
     def fetchGroups(self):
         service = self.getCalendarService()
+        if not service:
+            return
         groups = []
         for group in service.calendarList().list().execute()['items']:
             #print('group =', group)
@@ -329,16 +352,24 @@ class GoogleAccount(Account):
         self.remoteGroups = groups
         return True
     def fetchAllEventsInGroup(self, remoteGroupId):
-        eventsRes = self.getCalendarService().events().list(
+        service = self.getCalendarService()
+        if not service:
+            return
+        eventsRes = service.events().list(
             calendarId=remoteGroupId,
             orderBy='updated',
         ).execute()
         return eventsRes.get('items', [])
     def sync(self, group, remoteGroupId, resPerPage=50):
-        service = self.getCalendarService()
         ## if remoteGroupId=='tasks':## FIXME
+        ##     service = self.getTasksService()
+        service = self.getCalendarService()
+        if not service:
+            return
         lastSync = group.getLastSync()
+        funcStartTime = now()
         ########################### Pull
+        print('------------------- pulling...')
         kwargs = dict(
             calendarId=remoteGroupId,
             orderBy='updated',
@@ -350,35 +381,49 @@ class GoogleAccount(Account):
         if lastSync:
             kwargs['updatedMin'] = getIcsTimeByEpoch(lastSync, True) ## FIXME
             ## int(lastSync)
+        #print(kwargs)
         request = service.events().list(**kwargs)
-        dumpRequest(request)
-        geventsRes = request.execute()
+        #dumpRequest(request)
+        try:
+            geventsRes = request.execute()
+        except HttpError as e:
+            self.showHttpException(e)
+            return False
         #pprint(geventsRes)
         try:
             gevents = geventsRes['items']
         except KeyError:
             gevents = []
+        #pprint(gevents)
         for gevent in gevents:
+            if gevent['status'] != 'confirmed':## FIXME
+                continue
             event = importEvent(gevent, group)
             if not event:
-                print('---------- event %s can not be pulled'%event)
+                print('---------- event can not be pulled: %s'%pformat(gevent))
                 continue
             remoteIds = (self.id, remoteGroupId, gevent['id'])
+            event.remoteIds = remoteIds
             eventId = group.eventIdByRemoteIds.get(remoteIds, None)
             if eventId is None:
                 event.afterModify()
                 group.append(event)
                 event.save()
                 group.save()
-                print('---------- event %s added in starcal'%event.summary)
+                #print('---------- event %s added in starcal'%event.summary)
             else:
                 try:
                     event = group[eventId]
                 except Exception as e:
                     pass
+        #group.afterSync()## FIXME
+        #group.save()## FIXME
         ########################### Push
+        print('------------------- pushing...')
         ## if remoteGroupId=='tasks':## FIXME
         for event in group:
+            if event.modified > funcStartTime:
+                continue
             #print('---------- event %s'%event.summary)
             remoteEventId = None
             if event.remoteIds:
@@ -406,12 +451,18 @@ class GoogleAccount(Account):
                 #gevent['id'] = remoteEventId
                 #if not 'recurrence' in gevent:
                 #    gevent['recurrence'] = None ## or [] FIXME
-                service.events().update(## patch or update? FIXME
+                request = service.events().update(## patch or update? FIXME
                     eventId=remoteEventId,
                     body=gevent,
                     calendarId=remoteGroupId
-                ).execute()
-                print('---------- event %s updated on server'%event.summary)
+                )
+                try:
+                    request.execute()
+                except HttpError as e:
+                    self.showHttpException(e)
+                    return False ## FIXME
+                else:
+                    print('---------- event %s updated on server'%event.summary)
             else:## FIXME
                 request = service.events().insert(
                     body=gevent,
@@ -419,7 +470,11 @@ class GoogleAccount(Account):
                     sendNotifications=False,
                 )
                 #dumpRequest(request)
-                response = request.execute()
+                try:
+                    response = request.execute()
+                except HttpError as e:
+                    self.showHttpException(e)
+                    return False ## FIXME
                 #print('response = %s'%pformat(response))
                 remoteEventId = response['id']
                 print('----------- event %s added on server'%event.summary)

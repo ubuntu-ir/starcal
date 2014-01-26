@@ -2556,6 +2556,8 @@ class EventGroup(EventContainer):
             data['showInDCal'] = data['showInWCal'] = data['showInMCal'] = data['showInCal']
             del data['showInCal']
         EventContainer.setData(self, data)
+        if isinstance(self.remoteIds, list):
+            self.remoteIds = tuple(self.remoteIds)
         for attr in ('remoteSyncData', 'eventIdByRemoteIds'):
             value = getattr(self, attr)
             if isinstance(value, list):
@@ -2566,7 +2568,7 @@ class EventGroup(EventContainer):
                     if not isinstance(item[0], (tuple, list)):
                         continue
                     valueDict[tuple(item[0])] = item[1]
-                setattr(self, attr, value)
+                setattr(self, attr, valueDict)
         '''
         if 'remoteSyncData' in data:
             self.remoteSyncData = {}
