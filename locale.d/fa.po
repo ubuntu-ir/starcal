@@ -1892,6 +1892,10 @@ msgid "Remote Group"
 msgstr ""
 "گروه راه‌دور"
 
+msgid "Fetch"
+msgstr ""
+"واکشی"
+
 
 msgid "No account selected"
 msgstr ""
