@@ -311,6 +311,7 @@ class GoogleAccount(Account):
                 http=self.getHttp(),
                 developerKey=developerKey,
             )
+            ## returns a Resource instance
         except HttpError as e:
             self.showHttpException(e)
     def getTasksService(self):
@@ -383,6 +384,7 @@ class GoogleAccount(Account):
             ## int(lastSync)
         #print(kwargs)
         request = service.events().list(**kwargs)
+        ## request is a HttpRequest instance
         #dumpRequest(request)
         try:
             geventsRes = request.execute()
