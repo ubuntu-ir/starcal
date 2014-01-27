@@ -928,8 +928,10 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
             'account': account.title,
         }
         account.showError = showError
+        while gtk.events_pending():
+            gtk.main_iteration_do(False)
         #try:
-        account.sync(group, remoteGid)
+        self.waitingDo(account.sync, group, remoteGid)
         '''
         except Exception as e:
             showError(
