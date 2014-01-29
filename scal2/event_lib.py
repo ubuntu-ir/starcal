@@ -2406,6 +2406,7 @@ class EventGroup(EventContainer):
         'remoteIds',
         'remoteSyncData',
         'eventIdByRemoteIds',
+        'deletedRemoteEvents',
         'idList',
     )
     showInCal = lambda self: self.showInDCal or self.showInWCal or self.showInMCal
@@ -2515,6 +2516,7 @@ class EventGroup(EventContainer):
         ## remote groupId can be an integer or string or unicode (depending on remote account type)
         self.remoteSyncData = {}
         self.eventIdByRemoteIds = {}
+        self.deletedRemoteEvents = {}
     def save(self):
         if self.id is None:
             self.setId()
@@ -2547,7 +2549,7 @@ class EventGroup(EventContainer):
     def getData(self):
         data = EventContainer.getData(self)
         data['type'] = self.name
-        for attr in ('remoteSyncData', 'eventIdByRemoteIds'):
+        for attr in ('remoteSyncData', 'eventIdByRemoteIds', 'deletedRemoteEvents'):
             if isinstance(data[attr], dict):
                 data[attr] = sorted(data[attr].items())
         return data
@@ -2558,7 +2560,7 @@ class EventGroup(EventContainer):
         EventContainer.setData(self, data)
         if isinstance(self.remoteIds, list):
             self.remoteIds = tuple(self.remoteIds)
-        for attr in ('remoteSyncData', 'eventIdByRemoteIds'):
+        for attr in ('remoteSyncData', 'eventIdByRemoteIds', 'deletedRemoteEvents'):
             value = getattr(self, attr)
             if isinstance(value, list):
                 valueDict = {}
@@ -2623,6 +2625,8 @@ class EventGroup(EventContainer):
             del self.eventCache[event.id]
         except:
             pass
+        if event.remoteIds:
+            self.deletedRemoteEvents[event.id] = (now(),) + event.remoteIds
         try:
             del self.eventIdByRemoteIds[event.remoteIds]
         except:

@@ -45,7 +45,7 @@ from oauth2client.file import Storage
 from oauth2client.client import OAuth2WebServerFlow
 
 
-from scal2.utils import toStr, toUnicode
+from scal2.utils import toStr, toUnicode, myRaise
 from scal2.ics import *
 from scal2.locale_man import tr as _
 from scal2 import core
@@ -59,6 +59,10 @@ auth_local_webserver = True
 auth_host_name = 'localhost'
 auth_host_port = [8080, 8090]
 
+
+STATUS_UNCHANCHED, STATUS_ADDED, STATUS_DELETED, STATUS_MODIFIED = range(4)
+
+calcEtag = lambda gevent: compressLongInt(abs(hash(repr(gevent))))
 
 decodeIcsStartEnd = lambda value: {
     ('dateTime' if 'T' in value else 'date'): value,
@@ -129,9 +133,10 @@ def importEvent(gevent, group):
     ##
     recurring = False
     if 'recurrence' in gevent:
-        key, value = gevent['recurrence'].upper().split(':')## multi line? FIXME
-        icsData.append((key, value))
         recurring = True
+        for recStr in gevent['recurrence']:
+            key, value = recStr.upper().split(':')## multi line? FIXME
+            icsData.append((key, value))
     try:
         eventType = gevent['extendedProperties']['shared']['starcal_type']
     except KeyError:
@@ -149,15 +154,14 @@ def importEvent(gevent, group):
     if 'reminders' in gevent:
         try:
             minutes = gevent['reminders']['overrides']['minutes']
-        except:
-            pass## FIXME
+        except KeyError:
+            myRaise()## FIXME
         else:
             self.notifyBefore = (minutes, 60)
     return event
 
 
-def setEtag(gevent):
-    gevent['etag'] = compressLongInt(abs(hash(repr(gevent))))
+
 
 class ClientRedirectServer(BaseHTTPServer.HTTPServer):
   """A server to handle OAuth 2.0 redirects back to localhost.
@@ -370,7 +374,7 @@ class GoogleAccount(Account):
         lastSync = group.getLastSync()
         funcStartTime = now()
         ########################### Pull
-        print('------------------- pulling...')
+        #print('------------------- pulling...')
         kwargs = dict(
             calendarId=remoteGroupId,
             orderBy='updated',
@@ -397,49 +401,76 @@ class GoogleAccount(Account):
         except KeyError:
             gevents = []
         #pprint(gevents)
+        diff = {}
+        def addToDiff(key, here, status, *args):
+            value = (status, here) + args
+            try:
+                diff[key].append(value)
+            except KeyError:
+                diff[key] = [value]
         for gevent in gevents:
+            remoteIds = (self.id, remoteGroupId, gevent['id'])
+            eventId = group.eventIdByRemoteIds.get(remoteIds, None)
+            bothId = (eventId, gevent['id'])
+            if gevent['status'] == 'cancelled':
+                if eventId is not None:
+                    addToDiff(bothId, False, STATUS_DELETED)
+                    #group.remove(group[eventId])
+                    #group.save() ## FIXME
             if gevent['status'] != 'confirmed':## FIXME
+                print(gevent['status'], gevent['summary'])
                 continue
             event = importEvent(gevent, group)
             if not event:
-                print('---------- event can not be pulled: %s'%pformat(gevent))
+                #print('---------- event can not be pulled: %s'%pformat(gevent))
                 continue
-            remoteIds = (self.id, remoteGroupId, gevent['id'])
             event.remoteIds = remoteIds
-            eventId = group.eventIdByRemoteIds.get(remoteIds, None)
             if eventId is None:
-                event.afterModify()
-                group.append(event)
-                event.save()
-                group.save()
+                addToDiff(bothId, False, STATUS_ADDED, event)
+                #event.afterModify()
+                #group.append(event)
+                #event.save()
+                #group.save()
                 #print('---------- event %s added in starcal'%event.summary)
             else:
-                try:
-                    event = group[eventId]
-                except Exception as e:
-                    pass
+                addToDiff(bothId, False, STATUS_MODIFIED, event)
+                #local_event = group[eventId]
+                #local_event.copyFrom(event)
+                #local_event.save()
         #group.afterSync()## FIXME
         #group.save()## FIXME
         ########################### Push
-        print('------------------- pushing...')
+        #print('------------------- pushing...')
         ## if remoteGroupId=='tasks':## FIXME
+        for eventId, eventRemoteAttrs in group.deletedRemoteEvents.items():
+            deletedEpoch, tmp_accountId, tmp_remoteGroupId, remoteEventId = eventRemoteAttrs
+            if deletedEpoch > funcStartTime:
+                continue
+            if tmp_accountId, tmp_remoteGroupId != self.id, remoteGroupId:
+                del group.deletedRemoteEvents[eventId]
+                continue
+            bothId = (eventId, remoteEventId)
+            addToDiff(bothId, True, STATUS_DELETED)
         for event in group:
             if event.modified > funcStartTime:
                 continue
             #print('---------- event %s'%event.summary)
             remoteEventId = None
             if event.remoteIds:
-                if event.remoteIds[0]==self.id and event.remoteIds[1]==remoteGroupId:
+                if event.remoteIds[:2] == (self.id, remoteGroupId):
                     remoteEventId = event.remoteIds[2]
             #print('---------- remoteEventId = %s'%remoteEventId)
             if remoteEventId and lastSync and event.modified < lastSync:
                 #print('---------- skipping event %s (modified = %s < %s = lastPush)'%(event.summary, event.modified, lastPush))
                 continue
+            bothId = (event.id, remoteEventId)
+            addToDiff(bothId, True, STATUS_MODIFIED, event)
+            '''
             gevent = exportEvent(event)
             if gevent is None:
                 print('---------- event %s can not be pushed'%event.summary)
                 continue
-            setEtag(gevent)
+            gevent['etag'] = calcEtag(gevent)
             #print('etag = %r'%gevent['etag'])
             gevent.update({
                 'calendarId': remoteGroupId,
@@ -483,6 +514,7 @@ class GoogleAccount(Account):
             event.remoteIds = [self.id, remoteGroupId, remoteEventId]
             event.save()
             group.eventIdByRemoteIds[tuple(event.remoteIds)] = event.id## TypeError: unhashable type: 'list'
+        '''
         group.afterSync()## FIXME
         group.save()## FIXME
         return True
