@@ -102,6 +102,7 @@ def exportEvent(event):
         },
         'extendedProperties':{
             'shared': {
+                'starcal_id': event.id,
                 'starcal_type': event.name,
             },
         }
@@ -410,7 +411,13 @@ class GoogleAccount(Account):
                 diff[key] = [value]
         for gevent in gevents:
             remoteIds = (self.id, remoteGroupId, gevent['id'])
-            eventId = group.eventIdByRemoteIds.get(remoteIds, None)
+            ###
+            try:
+                #eventId = group.eventIdByRemoteIds[remoteIds]
+                eventId = gevent['extendedProperties']['shared']['starcal_id']
+            except KeyError:
+                eventId = None
+            ###
             bothId = (eventId, gevent['id'])
             if gevent['status'] == 'cancelled':
                 if eventId is not None:
@@ -513,7 +520,7 @@ class GoogleAccount(Account):
                 print('----------- event %s added on server'%event.summary)
             event.remoteIds = [self.id, remoteGroupId, remoteEventId]
             event.save()
-            group.eventIdByRemoteIds[tuple(event.remoteIds)] = event.id## TypeError: unhashable type: 'list'
+            #group.eventIdByRemoteIds[tuple(event.remoteIds)] = event.id## TypeError: unhashable type: 'list'
         '''
         group.afterSync()## FIXME
         group.save()## FIXME

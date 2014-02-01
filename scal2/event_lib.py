@@ -2383,7 +2383,8 @@ class EventGroup(EventContainer):
         'endJd',
         'remoteIds',
         'remoteSyncData',
-        'eventIdByRemoteIds',
+        #'eventIdByRemoteIds',
+        'deletedRemoteEvents',
         ## 'defaultEventType'
     )
     jsonParams = (
@@ -2405,7 +2406,7 @@ class EventGroup(EventContainer):
         'endJd',
         'remoteIds',
         'remoteSyncData',
-        'eventIdByRemoteIds',
+        #'eventIdByRemoteIds',
         'deletedRemoteEvents',
         'idList',
     )
@@ -2515,7 +2516,7 @@ class EventGroup(EventContainer):
         self.remoteIds = None## (accountId, groupId)
         ## remote groupId can be an integer or string or unicode (depending on remote account type)
         self.remoteSyncData = {}
-        self.eventIdByRemoteIds = {}
+        #self.eventIdByRemoteIds = {}
         self.deletedRemoteEvents = {}
     def save(self):
         if self.id is None:
@@ -2549,7 +2550,11 @@ class EventGroup(EventContainer):
     def getData(self):
         data = EventContainer.getData(self)
         data['type'] = self.name
-        for attr in ('remoteSyncData', 'eventIdByRemoteIds', 'deletedRemoteEvents'):
+        for attr in (
+            'remoteSyncData',
+            #'eventIdByRemoteIds',
+            'deletedRemoteEvents',
+        ):
             if isinstance(data[attr], dict):
                 data[attr] = sorted(data[attr].items())
         return data
@@ -2560,7 +2565,11 @@ class EventGroup(EventContainer):
         EventContainer.setData(self, data)
         if isinstance(self.remoteIds, list):
             self.remoteIds = tuple(self.remoteIds)
-        for attr in ('remoteSyncData', 'eventIdByRemoteIds', 'deletedRemoteEvents'):
+        for attr in (
+            'remoteSyncData',
+            #'eventIdByRemoteIds',
+            'deletedRemoteEvents',
+        ):
             value = getattr(self, attr)
             if isinstance(value, list):
                 valueDict = {}
@@ -2571,21 +2580,6 @@ class EventGroup(EventContainer):
                         continue
                     valueDict[tuple(item[0])] = item[1]
                 setattr(self, attr, valueDict)
-        '''
-        if 'remoteSyncData' in data:
-            self.remoteSyncData = {}
-            for remoteIds, syncData in data['remoteSyncData']:
-                if remoteIds is None:
-                    continue
-                if isinstance(syncData, (list, tuple)):
-                    syncData = syncData[1]
-                self.remoteSyncData[tuple(remoteIds)] = syncData
-        if 'eventIdByRemoteIds' in data:
-            self.eventIdByRemoteIds = {}
-            for remoteIds, eventId in data['eventIdByRemoteIds']:
-                self.eventIdByRemoteIds[tuple(remoteIds)] = eventId
-            #print(self.eventIdByRemoteIds)
-        '''
         if 'id' in data:
             self.setId(data['id'])
         self.startJd = int(self.startJd)
@@ -2627,10 +2621,10 @@ class EventGroup(EventContainer):
             pass
         if event.remoteIds:
             self.deletedRemoteEvents[event.id] = (now(),) + event.remoteIds
-        try:
-            del self.eventIdByRemoteIds[event.remoteIds]
-        except:
-            pass
+        #try:
+        #    del self.eventIdByRemoteIds[event.remoteIds]
+        #except:
+        #    pass
         self.occurCount -= self.occur.delete(event.id)
         return index
     def removeAll(self):## clearEvents or excludeAll or removeAll FIXME
@@ -2645,8 +2639,8 @@ class EventGroup(EventContainer):
         EventContainer.postAdd(self, event)
         if len(self.eventCache) < self.eventCacheSize:
             self.eventCache[event.id] = event
-        if event.remoteIds:
-            self.eventIdByRemoteIds[event.remoteIds] = event.id
+        #if event.remoteIds:
+        #    self.eventIdByRemoteIds[event.remoteIds] = event.id
         ## need to update self.occur?
         ## its done in event.afterModify() right? not when moving event from another group
         if self.enable:
@@ -2785,7 +2779,12 @@ class EventGroup(EventContainer):
                     vevent += '%s:%s\n'%(key, value)
                 vevent += 'END:VEVENT\n'
                 fp.write(vevent)
-    importExportExclude = 'remoteIds', 'remoteSyncData', 'eventIdByRemoteIds'
+    importExportExclude = (
+        'remoteIds',
+        'remoteSyncData',
+        #'eventIdByRemoteIds',
+        'deletedRemoteEvents',
+    )
     def exportData(self):
         data = self.getData()
         for attr in self.importExportExclude:
