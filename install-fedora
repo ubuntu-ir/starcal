@@ -30,10 +30,10 @@ version=`$sourceDir/scal2/get_version.py`
 
 requires=('python(>=2.6)' 'python(<<3.0)')
 requires+=('pygtk2(>=2.8)')
-requires+=('python-gflags')
+requires+=('pygobject2') ## The old "gobject" module
+#requires+=('python-gflags')
 requires+=('python-httplib2')
-requires+=('pytz')
-depends+=('python-dateutil')
+requires+=('python-dateutil')
 
 if [ -f "/usr/lib/$HOSTTYPE-$OSTYPE/libappindicator.so.1" ] ; then
     requires+=('python-appindicator')
@@ -45,7 +45,7 @@ requires+=('python-igraph')
 #requires+=('python-gnomevfs')
 
 
-requires_str=$(printf ", %s" "${requires[@]}") ; requires_str=${requires_str:2}
+requires_str=$(printf " %s" "${requires[@]}") ; requires_str=${requires_str:2}
 #recommends_str=$(printf ", %s" "${recommends[@]}") ; recommends_str=${recommends_str:2}
 
 

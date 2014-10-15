@@ -18,9 +18,8 @@
 # or /usr/share/licenses/common/GPL3/license.txt on ArchLinux
 
 from math import log10
-#import random
 
-from scal2.time_utils import getEpochFromJd, getJdFromEpoch, getFloatJdFromEpoch, getJhmsFromEpoch
+from scal2.time_utils import getEpochFromJd, getJdFromEpoch, getFloatJdFromEpoch, getJhmsFromEpoch, getUtcOffsetCurrent
 from scal2.date_utils import jwday, getEpochFromDate
 from scal2.cal_types import calTypes, jd_to, to_jd
 from scal2.timeline_box import *
@@ -199,6 +198,7 @@ def formatYear(y, prettyPower=False):
     return LRM + y_st
 
 #def setRandomColorsToEvents():
+#    import random
 #    events = ui.events[:]
 #    random.shuffle(events)
 #    dh = 360.0/len(events)
@@ -323,7 +323,8 @@ def calcTimeLineData(timeStart, timeWidth, pixelPerSec, borderTm):
         if stepSec < minStep:
             break
         unitSize = stepSec*pixelPerSec
-        firstEpoch = iceil(timeStart/stepSec)*stepSec
+        utcOffset = int(getUtcOffsetCurrent())
+        firstEpoch = iceil((timeStart+utcOffset) / stepSec) * stepSec - utcOffset
         for tmEpoch in range(firstEpoch, iceil(timeEnd), stepSec):
             if tmEpoch in tickEpochList:
                 continue

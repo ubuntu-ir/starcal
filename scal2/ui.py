@@ -19,13 +19,11 @@
 
 from time import time as now
 
-import sys, os, os.path, shutil
+import sys, os, os.path
 from os import listdir
 from os.path import dirname, join, isfile, splitext, isabs
-from xml.dom.minidom import parse## remove FIXME
-from subprocess import Popen
 
-from scal2.utils import NullObj, cleanCacheDict
+from scal2.utils import NullObj, cleanCacheDict, myRaise, myRaiseTback
 from scal2.utils import toStr
 from scal2.path import *
 
@@ -36,9 +34,7 @@ from scal2.locale_man import tr as _
 from scal2.locale_man import numDecode
 
 from scal2 import core
-from scal2.core import APP_NAME, myRaise, myRaiseTback, getMonthLen
 
-from scal2.startup import addStartup, removeStartup, checkStartup
 from scal2 import event_lib
 
 uiName = ''
@@ -56,11 +52,15 @@ def parseDroppedDate(text):
             return None
         maxPart = max(part)
         if maxPart > 999:
-            minMax = ((1000, 2100), (1, 12), (1, 31))
-            formats=(
-                    [0, 1, 2],
-                    [1, 2, 0],
-                    [2, 1, 0],
+            minMax = (
+                (1000, 2100),
+                (1, 12),
+                (1, 31),
+            )
+            formats = (
+                [0, 1, 2],
+                [1, 2, 0],
+                [2, 1, 0],
             )
             for format in formats:
                 for i in range(3):
@@ -143,10 +143,11 @@ def checkNeedRestart():
             return True
     return False
 
-getPywPath = lambda: join(rootDir, APP_NAME + ('-qt' if uiName=='qt' else '') + '.pyw')
+getPywPath = lambda: join(rootDir, core.APP_NAME + ('-qt' if uiName=='qt' else '') + '.pyw')
 
 
 def dayOpenEvolution(arg=None):
+    from subprocess import Popen
     ##y, m, d = jd_to(cell.jd-1, core.DATE_GREG) ## in gnome-cal opens prev day! why??
     y, m, d = cell.dates[core.DATE_GREG]
     Popen('LANG=en_US.UTF-8 evolution calendar:///?startdate=%.4d%.2d%.2d'%(y, m, d), shell=True)## FIXME
@@ -155,6 +156,7 @@ def dayOpenEvolution(arg=None):
     ## evolution calendar:///?startdate=$(date +"%Y%m%dT%H%M%SZ")
 
 def dayOpenSunbird(arg=None):
+    from subprocess import Popen
     ## does not work on latest version of Sunbird ## FIXME
     ## and Sunbird seems to be a dead project
     ## Opens previous day in older version
@@ -167,6 +169,9 @@ def dayOpenSunbird(arg=None):
 
 
 class Cell:## status and information of a cell
+    #ocTimeMax = 0
+    #ocTimeCount = 0
+    #ocTimeSum = 0
     def __init__(self, jd):
         self.eventsData = []
         #self.eventsDataIsSet = False ## not used
@@ -202,7 +207,12 @@ class Cell:## status and information of a cell
                 except:
                     myRaiseTback()
         ###################
+        #t0 = now()
         self.eventsData = event_lib.getDayOccurrenceData(jd, eventGroups)## here? FIXME
+        #dt = now() - t0
+        #Cell.ocTimeSum += dt
+        #Cell.ocTimeCount += 1
+        #Cell.ocTimeMax = max(Cell.ocTimeMax, dt)
     def format(self, binFmt, mode=None, tm=null):## FIXME
         if mode is None:
             mode = calTypes.primary
@@ -297,14 +307,14 @@ def jdPlus(plus=1):
 def monthPlus(plus=1):
     global cell
     year, month = core.monthPlus(cell.year, cell.month, plus)
-    day = min(cell.day, getMonthLen(year, month, calTypes.primary))
+    day = min(cell.day, core.getMonthLen(year, month, calTypes.primary))
     cell = cellCache.getCellByDate(year, month, day)
 
 def yearPlus(plus=1):
     global cell
     year = cell.year + plus
     month = cell.month
-    day = min(cell.day, getMonthLen(year, month, calTypes.primary))
+    day = min(cell.day, core.getMonthLen(year, month, calTypes.primary))
     cell = cellCache.getCellByDate(year, month, day)
 
 getFont = lambda: list(fontCustom if fontCustomEnable else fontDefault)
@@ -406,11 +416,14 @@ def duplicateGroupTitle(group):
 
 
 def init():
+    global todayCell, cell
     core.init()
     #### Load accounts, groups and trash? FIXME
     eventAccounts.load()
     eventGroups.load()
     eventTrash.load()
+    ####
+    todayCell = cell = cellCache.getTodayCell() ## FIXME
 
 
 
@@ -510,15 +523,6 @@ getEventTagsDict = lambda: dict([(tagObj.name, tagObj) for tagObj in eventTags])
 eventTagsDesc = dict([(t.name, t.desc) for t in eventTags])
 
 ###################
-for fname in os.listdir(join(srcDir, 'accounts')):
-    name, ext = splitext(fname)
-    if ext == '.py' and name != '__init__':
-        try:
-            __import__('scal2.accounts.%s'%name)
-        except:
-            core.myRaiseTback()
-#print('accounts', event_lib.classes.account.names)
-###########
 eventAccounts = event_lib.EventAccountsHolder()
 eventGroups = event_lib.EventGroupsHolder()
 eventTrash = event_lib.EventTrash()
@@ -551,14 +555,12 @@ reloadTrash = False
 
 
 ###################
-core.loadAllPlugins()## FIXME
-###################
 ## BUILD CACHE AFTER SETTING calTypes.primary
 maxDayCacheSize = 100 ## maximum size of cellCache (days number)
 maxWeekCacheSize = 12
 
 cellCache = CellCache()
-todayCell = cell = cellCache.getTodayCell() ## FIXME
+todayCell = cell = None
 ###########################
 autoLocale = True
 logo = '%s/starcal2.png'%pixDir
@@ -571,7 +573,7 @@ mcalHeight = 250
 winTaskbar = False
 useAppIndicator = True
 showDigClockTb = True ## On Toolbar ## FIXME
-showDigClockTr = True ## On Tray
+showDigClockTr = True ## On Status Icon
 ####
 toolbarIconSizePixel = 24 ## used in pyqt ui
 ####
@@ -610,7 +612,7 @@ wcal_weekDays_width = 80
 wcal_eventsCount_width = 80
 wcal_eventsCount_expand = False
 wcal_eventsIcon_width = 50
-wcal_eventsText_showDesc = True
+wcal_eventsText_showDesc = False
 wcal_eventsText_colorize = True
 wcal_daysOfMonth_width = 30
 wcal_daysOfMonth_dir = 'ltr' ## ltr/rtl/auto
@@ -656,14 +658,14 @@ boldYmLabel = True ## apply in Pref FIXME
 showYmArrows = True ## apply in Pref FIXME
 labelMenuDelay = 0.1 ## delay for shift up/down items of menu for right click on YearLabel
 ####################
-trayImage = join(pixDir, 'tray-dark-green.svg')
-trayImageHoli = join(pixDir, 'tray-dark-red.svg')
-trayImageDefault, trayImageHoliDefault = trayImage, trayImageHoli
-trayFontFamilyEnable = False
-trayFontFamily = None
+statusIconImage = join(rootDir, 'status-icons', 'dark-green.svg')
+statusIconImageHoli = join(rootDir, 'status-icons', 'dark-red.svg')
+statusIconImageDefault, statusIconImageHoliDefault = statusIconImage, statusIconImageHoli
+statusIconFontFamilyEnable = False
+statusIconFontFamily = None
 ####################
 menuActiveLabelColor = "#ff0000"
-pluginsTextTray = False
+pluginsTextStatusIcon = False
 pluginsTextInsideExpander = True
 pluginsTextIsExpanded = True ## affect only if pluginsTextInsideExpander
 eventViewMaxHeight = 200
@@ -695,7 +697,7 @@ fontDefault = ['Sans', False, False, 12]
 fontCustom = None
 fontCustomEnable = False
 #####################
-showMain = True ## Show main window on start (or only goto tray)
+showMain = True ## Show main window on start (or only goto statusIcon)
 #####################
 mainWinItems = (
     ('winContronller', True),
@@ -710,6 +712,7 @@ mainWinItems = (
 )
 
 mainWinItemsDefault = mainWinItems[:]
+
 
 wcalItems = (
     ('toolbar', True),
@@ -726,6 +729,7 @@ wcalItemsDefault = wcalItems[:]
 
 ntpServers = (
     'pool.ntp.org',
+    'ir.pool.ntp.org',
     'asia.pool.ntp.org',
     'europe.pool.ntp.org',
     'north-america.pool.ntp.org',
@@ -776,10 +780,10 @@ if os.path.isfile(confPathLive):
         myRaise(__file__)
 ################################
 
-if not isfile(trayImage):
-    trayImage = trayImageDefault
-if not isfile(trayImageHoli):
-    trayImageHoli = trayImageHoliDefault
+if not isfile(statusIconImage):
+    statusIconImage = statusIconImageDefault
+if not isfile(statusIconImageHoli):
+    statusIconImageHoli = statusIconImageHoliDefault
 
 try:
     mcalGridColor = wcalGridColor = gridColor

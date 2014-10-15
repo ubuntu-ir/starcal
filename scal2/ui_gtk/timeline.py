@@ -43,7 +43,7 @@ from scal2.ui_gtk.drawing import setColor, fillColor, newTextLayout, Button
 from scal2.ui_gtk import gtk_ud as ud
 #from scal2.ui_gtk import preferences
 from scal2.ui_gtk.timeline_box import *
-from scal2.ui_gtk.event.common import EventEditorDialog, GroupEditorDialog, confirmEventTrash
+
 import scal2.ui_gtk.event.main
 
 
@@ -53,7 +53,7 @@ def show_event(widget, event):
 
 
 @registerSignals
-class TimeLine(gtk.Widget, ud.IntegratedCalObj):
+class TimeLine(gtk.Widget, ud.BaseCalObj):
     _name = 'timeLine'
     desc = _('Time Line')
     def centerToNow(self):
@@ -399,9 +399,10 @@ class TimeLine(gtk.Widget, ud.IntegratedCalObj):
         self.get_window().set_cursor(gdk.Cursor(gdk.LEFT_PTR))
         self.queue_draw()
     def onConfigChange(self, *a, **kw):
-        ud.IntegratedCalObj.onConfigChange(self, *a, **kw)
+        ud.BaseCalObj.onConfigChange(self, *a, **kw)
         self.queue_draw()
     def editEventClicked(self, menu, winTitle, event, gid):
+        from scal2.ui_gtk.event.editor import EventEditorDialog
         event = EventEditorDialog(
             event,
             title=winTitle,
@@ -412,6 +413,7 @@ class TimeLine(gtk.Widget, ud.IntegratedCalObj):
         ui.reloadGroups.append(gid)
         self.onConfigChange()
     def editGroupClicked(self, menu, winTitle, group):
+        from scal2.ui_gtk.event.group.editor import GroupEditorDialog
         group = GroupEditorDialog(group).run()
         if group is not None:
             group.afterModify()
@@ -420,6 +422,7 @@ class TimeLine(gtk.Widget, ud.IntegratedCalObj):
             ud.windowList.onConfigChange()
             self.queue_draw()
     def moveEventToTrash(self, menu, group, event):
+        from scal2.ui_gtk.event.utils import confirmEventTrash
         if not confirmEventTrash(event):
             return
         eventIndex = group.index(event.id)
@@ -464,13 +467,13 @@ class TimeLine(gtk.Widget, ud.IntegratedCalObj):
         #elif k=='page_down':
         #    pass
         #elif k=='menu':# Simulate right click (key beside Right-Ctrl)
-        #    #self.emit('popup-menu-cell', event.time, *self.getCellPos())
+        #    #self.emit('popup-cell-menu', event.time, *self.getCellPos())
         #elif k in ('f10','m'): # F10 or m or M
         #    if event.state & gdk.SHIFT_MASK:
         #        # Simulate right click (key beside Right-Ctrl)
-        #        self.emit('popup-menu-cell', event.time, *self.getCellPos())
+        #        self.emit('popup-cell-menu', event.time, *self.getCellPos())
         #    else:
-        #        self.emit('popup-menu-main', event.time, *self.getMainMenuPos())
+        #        self.emit('popup-main-menu', event.time, *self.getMainMenuPos())
         elif k in ('plus', 'equal', 'kp_add'):
             self.keyboardZoom(True)
         elif k in ('minus', 'kp_subtract'):
@@ -537,7 +540,7 @@ class TimeLine(gtk.Widget, ud.IntegratedCalObj):
 
 
 @registerSignals
-class TimeLineWindow(gtk.Window, ud.IntegratedCalObj):
+class TimeLineWindow(gtk.Window, ud.BaseCalObj):
     _name = 'timeLineWin'
     desc = _('Time Line')
     def __init__(self):
@@ -565,8 +568,7 @@ class TimeLineWindow(gtk.Window, ud.IntegratedCalObj):
         return True
     def buttonPress(self, obj, event):
         if event.button==1:
-            px, py, mask = ud.rootWindow.get_pointer()
-            self.begin_move_drag(event.button, px, py, event.time)
+            self.begin_move_drag(event.button, int(event.x_root), int(event.y_root), event.time)
             return True
         return False
 

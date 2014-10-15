@@ -19,7 +19,7 @@
 
 from time import time as now
 
-import os, sys, shlex, thread
+import os, sys
 from os.path import join, dirname, split, splitext
 
 from scal2.path import *
@@ -42,8 +42,8 @@ from scal2.ui_gtk.drawing import newOutlineSquarePixbuf
 from scal2.ui_gtk import gtk_ud as ud
 from scal2.ui_gtk.mywidgets.dialog import MyDialog
 from scal2.ui_gtk.event import common
-from scal2.ui_gtk.event.common import EventEditorDialog, GroupEditorDialog
-from scal2.ui_gtk.event.common import addNewEvent, confirmEventTrash
+from scal2.ui_gtk.event.utils import *
+from scal2.ui_gtk.event.editor import *
 from scal2.ui_gtk.event.trash import TrashEditorDialog
 from scal2.ui_gtk.event.export import SingleGroupExportDialog, MultiGroupExportDialog
 from scal2.ui_gtk.event.import_event import EventsImportWindow
@@ -55,7 +55,7 @@ from scal2.ui_gtk.event.search_events import EventSearchWindow
 
 
 @registerSignals
-class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
+class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
     _name = 'eventMan'
     desc = _('Event Manager')
     def onShow(self, widget):
@@ -72,7 +72,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
         self.hide()
         self.emit('config-change')
     def onConfigChange(self, *a, **kw):
-        ud.IntegratedCalObj.onConfigChange(self, *a, **kw)
+        ud.BaseCalObj.onConfigChange(self, *a, **kw)
         ###
         if not self.isLoaded:
             if self.get_property('visible'):
@@ -458,13 +458,18 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
                 pasteItem.set_sensitive(self.canPasteToGroup(group))
                 ##
                 if group.remoteIds:
-                    menu.add(gtk.SeparatorMenuItem())
-                    menu.add(labelStockMenuItem(
-                        'Synchronize',
-                        gtk.STOCK_CONNECT,
-                        self.syncGroupFromMenu,
-                        path,
-                    ))
+                    aid, remoteGid = group.remoteIds
+                    account = ui.eventAccounts[aid]
+                    if account.enable:
+                        menu.add(gtk.SeparatorMenuItem())
+                        menu.add(labelStockMenuItem(
+                            'Synchronize',
+                            gtk.STOCK_CONNECT,## or gtk.STOCK_REFRESH FIXME
+                            self.syncGroupFromMenu,
+                            path,
+                            account,
+                        ))
+                    #else:## FIXME
                 ##
                 menu.add(gtk.SeparatorMenuItem())
                 #menu.add(labelStockMenuItem(
@@ -535,15 +540,6 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
                 )
                 menu.add(convertItem)
                 convertItem.set_sensitive(bool(group.idList))
-                ###
-                #if group.remoteIds:
-                #    account = ui.eventAccounts[group.remoteIds[0]]
-                #    menu.add(labelImageMenuItem(
-                #    _('Synchronize with %s') % account.title,
-                #    gtk.STOCK_REFRESH,
-                #    self.syncGroup,
-                #    path,
-                #))
                 ###
                 for newGroupType in group.canConvertTo:
                     menu.add(labelStockMenuItem(
@@ -865,6 +861,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
                         treev.set_cursor(path)
                         return True
     def insertNewGroup(self, groupIndex):
+        from scal2.ui_gtk.event.group.editor import GroupEditorDialog
         group = GroupEditorDialog().run()
         if group is None:
             return
@@ -916,13 +913,12 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
         )
         for event in newGroup:
             self.trees.append(newGroupIter, self.getEventRow(event))
-    def syncGroupFromMenu(self, menu, path):
+    def syncGroupFromMenu(self, menu, path, account):
         index, = path
         group, = self.getObjsByPath(path)
         if not group.remoteIds:
             return
         aid, remoteGid = group.remoteIds
-        account = ui.eventAccounts[aid]
         info = {
             'group': group.title,
             'account': account.title,
@@ -959,6 +955,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
             self.toPasteEvent = (path, False)
             self.pasteEventToPath(path)
     def editGroupByPath(self, path):
+        from scal2.ui_gtk.event.group.editor import GroupEditorDialog
         group, = self.getObjsByPath(path)
         if group.name == 'trash':
             self.editTrash()
@@ -1025,6 +1022,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
         )
         self.treeviewCursorChanged()
     def editEventByPath(self, path):
+        from scal2.ui_gtk.event.editor import EventEditorDialog
         group, event = self.getObjsByPath(path)
         if group.name == 'trash':## FIXME
             return
@@ -1300,102 +1298,5 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.IntegratedCalObj):## FIXME
     #    pass
     #def selectAllEventInTrash(self, menu):## FIXME
     #    pass
-
-
-
-
-
-def makeWidget(obj):## obj is an instance of Event, EventRule, EventNotifier or EventGroup
-    if hasattr(obj, 'WidgetClass'):
-        widget = obj.WidgetClass(obj)
-        try:
-            widget.show_all()
-        except AttributeError:
-            widget.show()
-        widget.updateWidget()## FIXME
-        return widget
-    else:
-        return None
-
-
-##############################################################################
-
-modPrefix = 'scal2.ui_gtk.event.'
-
-for cls in event_lib.classes.event:
-    try:
-        module = __import__(modPrefix + cls.name, fromlist=['EventWidget'])
-        cls.WidgetClass = module.EventWidget
-    except:
-        myRaise()
-
-for cls in event_lib.classes.rule:
-    try:
-        module = __import__(modPrefix + 'rules.' + cls.name, fromlist=['RuleWidget'])
-    except:
-        #if not cls.name.startswith('ex_'):
-        myRaise()
-        continue
-    try:
-        cls.WidgetClass = module.RuleWidget
-    except AttributeError:
-        print('no class RuleWidget defined in module "%s"'%cls.name)
-
-for cls in event_lib.classes.notifier:
-    try:
-        module = __import__(modPrefix + 'notifiers.' + cls.name, fromlist=['NotifierWidget', 'notify'])
-        cls.WidgetClass = module.NotifierWidget
-        cls.notify = module.notify
-    except:
-        myRaise()
-
-for cls in event_lib.classes.group:
-    try:
-        module = __import__(modPrefix + 'groups.' + cls.name, fromlist=['GroupWidget'])
-    except:
-        myRaise()
-        continue
-    try:
-        cls.WidgetClass = module.GroupWidget
-    except AttributeError:
-        print('no class GroupWidget defined in module "%s"'%cls.name)
-
-    for actionDesc, actionName in cls.actions:
-        try:
-            func = getattr(module, actionName)
-        except AttributeError:
-            print('no function %s defined in module "%s"'%(actionName, cls.name))
-        else:
-            setattr(cls, actionName, func)
-
-
-for cls in event_lib.classes.account:
-    try:
-        module = __import__(modPrefix + 'accounts.' + cls.name, fromlist=['AccountWidget'])
-    except:
-        myRaise()
-        continue
-    try:
-        cls.WidgetClass = module.AccountWidget
-    except AttributeError:
-        print('no class AccountWidget defined in module "%s"'%cls.name)
-
-
-event_lib.EventRule.makeWidget = makeWidget
-event_lib.EventNotifier.makeWidget = makeWidget
-event_lib.Event.makeWidget = makeWidget
-event_lib.EventGroup.makeWidget = makeWidget
-event_lib.Account.makeWidget = makeWidget
-
-
-### Load accounts, groups and trash? FIXME
-
-
-
-import scal2.ui_gtk.event.import_customday ## opens a dialog if neccessery
-
-
-##############################################################################
-
 
 
