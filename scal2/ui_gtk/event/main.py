@@ -254,22 +254,33 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         #####
         pack(self.vbox, treeBox, 1, 1)
         #######
-        self.trees = gtk.TreeStore(int, gdk.Pixbuf, str, str)
-        ## event: eid,  event_icon,   event_summary, event_description
-        ## group: gid,  group_pixbuf, group_title,   ?description
-        ## trash: -1,        trash_icon,   _('Trash'),    ''
+        self.trees = gtk.TreeStore(bool, int, gdk.Pixbuf, str, str)
+        self.colIndex = {
+            'bool': 0,
+            'id': 1,
+            'pixbuf': 2,
+            'summary': 3,
+            'desc': 4,
+        }
+        ## event: none,     eid,  event_icon,   event_summary, event_description
+        ## group: loaded,   gid,  group_pixbuf, group_title,   ?description
+        ## trash: none      -1,   trash_icon,   _('Trash'),    ''
         self.treev.set_model(self.trees)
         ###
         col = gtk.TreeViewColumn()
         cell = gtk.CellRendererPixbuf()
         pack(col, cell)
-        col.add_attribute(cell, 'pixbuf', 1)
+        col.add_attribute(
+            cell,
+            'pixbuf',
+            self.colIndex['pixbuf'],
+        )
         self.treev.append_column(col)
         ###
         col = gtk.TreeViewColumn(
             _('Summary'),
             gtk.CellRendererText(),
-            text=2,
+            text=self.colIndex['summary'],
         )
         col.set_resizable(True)
         self.treev.append_column(col)
@@ -277,7 +288,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         self.colDesc = gtk.TreeViewColumn(
             _('Description'),
             gtk.CellRendererText(),
-            text=3,
+            text=self.colIndex['desc'],
         )
         if ui.eventManShowDescription:
             self.treev.append_column(self.colDesc)
@@ -307,8 +318,9 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         gdkColorToRgb(getStyleColor(self.treev))
         ## bg color of non-selected rows
     getGroupRow = lambda self, group:\
-        common.getGroupRow(group, self.getRowBgColor()) + ('',)
+        (True,) + common.getGroupRow(group, self.getRowBgColor()) + ('',)
     getEventRow = lambda self, event: (
+        False,
         event.id,
         pixbufFromFile(event.icon),
         event.summary,
@@ -344,6 +356,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
             )
     def appendTrash(self):
         self.trashIter = self.trees.append(None, (
+            True,
             -1,
             pixbufFromFile(ui.eventTrash.icon),
             ui.eventTrash.title,
@@ -353,7 +366,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
             self.trees.append(self.trashIter, self.getEventRow(event))
     def reloadGroupEvents(self, gid):
         groupIter = self.groupIterById[gid]
-        assert self.trees.get_value(groupIter, 0) == gid
+        assert self.trees.get_value(groupIter, self.colIndex['id']) == gid
         ##
         self.removeIterChildren(groupIter)
         ##
@@ -379,7 +392,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         obj_list = []
         for i in range(len(path)):
             it = self.trees.get_iter(path[:i+1])
-            obj_id = self.trees.get_value(it, 0)
+            obj_id = self.trees.get_value(it, self.colIndex['id'])
             if i==0:
                 if obj_id==-1:
                     obj_list.append(ui.eventTrash)
@@ -810,8 +823,8 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                 n = self.trees.iter_n_children(groupIter)
                 for i in range(n):
                     eventIter = self.trees.iter_nth_child(groupIter, i)
-                    eid = self.trees.get(eventIter, 0)[0]
-                    self.trees.set(eventIter, 2, group[eid].summary)
+                    eid = self.trees.get(eventIter, self.colIndex['id'])[0]
+                    self.trees.set(eventIter, self.colIndex['summary'], group[eid].summary)
         except:
             myRaise()
     def onGroupModify(self, group):
@@ -848,7 +861,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                         groupIter = self.trees.get_iter(path)
                         self.trees.set_value(
                             groupIter,
-                            1,
+                            self.colIndex['pixbuf'],
                             newOutlineSquarePixbuf(
                                 group.color,
                                 20,
@@ -1086,12 +1099,12 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         TrashEditorDialog().run()
         self.trees.set_value(
             self.trashIter,
-            1,
+            self.colIndex['pixbuf'],
             pixbufFromFile(ui.eventTrash.icon),
         )
         self.trees.set_value(
             self.trashIter,
-            2,
+            self.colIndex['summary'],
             ui.eventTrash.title,
         )
     def moveUp(self, path):
@@ -1099,7 +1112,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         if len(path)==1:
             if path[0]==0:
                 return
-            if self.trees.get_value(srcIter, 0)==-1:
+            if self.trees.get_value(srcIter, self.colIndex['id'])==-1:
                 return
             tarIter = self.trees.get_iter((path[0]-1))
             self.trees.move_before(srcIter, tarIter)
@@ -1122,7 +1135,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                 if parentIndex < 1:
                     return
                 newParentIter = self.trees.get_iter((parentIndex - 1))
-                newParentId = self.trees.get_value(newParentIter, 0)
+                newParentId = self.trees.get_value(newParentIter, self.colIndex['id'])
                 if newParentId==-1:## could not be!
                     return
                 newGroup = ui.eventGroups[newParentId]
@@ -1147,10 +1160,10 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
     def moveDown(self, path):
         srcIter = self.trees.get_iter(path)
         if len(path)==1:
-            if self.trees.get_value(srcIter, 0)==-1:
+            if self.trees.get_value(srcIter, self.colIndex['id'])==-1:
                 return
             tarIter = self.trees.get_iter((path[0]+1))
-            if self.trees.get_value(tarIter, 0)==-1:
+            if self.trees.get_value(tarIter, self.colIndex['id'])==-1:
                 return
             self.trees.move_after(srcIter, tarIter)## or use self.trees.swap FIXME
             ui.eventGroups.moveDown(path[0])
@@ -1170,7 +1183,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                 if parentObj.name == 'trash':
                     return
                 newParentIter = self.trees.get_iter((parentIndex + 1))
-                newParentId = self.trees.get_value(newParentIter, 0)
+                newParentId = self.trees.get_value(newParentIter, self.colIndex['id'])
                 if newParentId==-1:
                     return
                 newGroup = ui.eventGroups[newParentId]

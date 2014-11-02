@@ -11,13 +11,13 @@ class MyDialog:
         self.get_window().set_cursor(gdk.Cursor(gdk.LEFT_PTR))
         self.vbox.set_sensitive(True)
     def waitingDo(self, func, *args, **kwargs):
-        self.startWaiting()
-        try:
-            func(*args, **kwargs)
-        except Exception as e:
-            raise e
-        finally:
-            self.endWaiting()
+        #self.startWaiting()
+        #try:
+        func(*args, **kwargs)
+        #except Exception as e:
+        #    raise e
+        #finally:
+        #    self.endWaiting()
 
 
 
