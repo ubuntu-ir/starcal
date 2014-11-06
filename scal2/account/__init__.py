@@ -1,0 +1,12 @@
+
+accountTypesData = [
+    ('google', 'Google'),
+]
+
+
+
+
+
+
+
+

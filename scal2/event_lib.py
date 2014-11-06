@@ -3795,6 +3795,16 @@ class EventGroupsHolder(JsonObjectsHolder):
 
 class EventAccountsHolder(JsonObjectsHolder):
     file = join(confDir, 'event', 'account_list.json')
+    def __init__(self):
+        from scal2.account import accountTypesData
+        JsonObjectsHolder.__init__(self)
+        self.accountTypesData = accountTypesData
+        ## check if account python file exists? FIXME
+    def getFirstClass(self):
+        if not self.accountTypesData:
+            return
+        name = self.accountTypesData[0][0]
+        return self.loadClass(name)
     def loadClass(self, name):
         try:
             return classes.account.byName[name]

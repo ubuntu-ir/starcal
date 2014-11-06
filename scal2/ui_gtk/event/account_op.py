@@ -3,7 +3,7 @@ from scal2 import event_lib
 from scal2 import ui
 
 from scal2.ui_gtk import *
-from scal2.ui_gtk.utils import dialog_add_button
+from scal2.ui_gtk.utils import dialog_add_button, showError
 from scal2.ui_gtk.event import makeWidget
 
 class AccountEditorDialog(gtk.Dialog):
@@ -21,8 +21,11 @@ class AccountEditorDialog(gtk.Dialog):
         #######
         hbox = gtk.HBox()
         combo = gtk.combo_box_new_text()
-        for cls in event_lib.classes.account:
-            combo.append_text(cls.desc)
+        if not ui.eventAccounts.accountTypesData:
+            showError(_('No account plugins found'))
+            return
+        for name, desc in ui.eventAccounts.accountTypesData:
+            combo.append_text(_(desc))
         pack(hbox, gtk.Label(_('Account Type')))
         pack(hbox, combo)
         pack(hbox, gtk.Label(''), 1, 1)
@@ -33,9 +36,12 @@ class AccountEditorDialog(gtk.Dialog):
             combo.set_active(event_lib.classes.account.names.index(self.account.name))
         else:
             self.isNew = True
-            defaultAccountTypeIndex = 0
-            combo.set_active(defaultAccountTypeIndex)
-            self.account = event_lib.classes.account[defaultAccountTypeIndex]()
+            cls = ui.eventAccounts.getFirstClass()
+            if not cls:
+                showError(_('Account class is empty'))
+                return
+            self.account = cls()
+            combo.set_active(0)
         self.activeWidget = None
         combo.connect('changed', self.typeChanged)
         self.comboType = combo
