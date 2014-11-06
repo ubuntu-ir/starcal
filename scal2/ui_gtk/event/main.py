@@ -47,7 +47,7 @@ from scal2.ui_gtk.event.editor import *
 from scal2.ui_gtk.event.trash import TrashEditorDialog
 from scal2.ui_gtk.event.export import SingleGroupExportDialog, MultiGroupExportDialog
 from scal2.ui_gtk.event.import_event import EventsImportWindow
-from scal2.ui_gtk.event.group_op import GroupSortDialog, GroupConvertModeDialog, GroupBulkEditDialog
+from scal2.ui_gtk.event.group_op import GroupSortDialog, GroupConvertModeDialog
 from scal2.ui_gtk.event.account_op import FetchRemoteGroupsDialog
 from scal2.ui_gtk.event.search_events import EventSearchWindow
 
@@ -104,6 +104,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         self.groupIterById = {}
         self.trashIter = None
         self.isLoaded = False
+        self.loadedGroupIds = set()
         ####
         self.set_title(_('Event Manager'))
         self.resize(600, 300)
@@ -321,13 +322,17 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
             self.getGroupRow(group),
         )
         return groupIter
-    def insertGroupTree(self, position, group):
-        groupIter = self.insertGroup(position, group)
+    def appendGroupEvents(self, group, groupIter):
         for event in group:
             self.trees.append(
                 groupIter,
                 self.getEventRow(event),
             )
+        self.loadedGroupIds.add(group.id)
+    def insertGroupTree(self, position, group):
+        groupIter = self.insertGroup(position, group)
+        if group.enable:
+            self.appendGroupEvents(group, groupIter)
     def appendGroup(self, group):
         self.groupIterById[group.id] = groupIter = self.trees.insert_before(
             None,
@@ -337,11 +342,8 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         return groupIter
     def appendGroupTree(self, group):
         groupIter = self.appendGroup(group)
-        for event in group:
-            self.trees.append(
-                groupIter,
-                self.getEventRow(event),
-            )
+        if group.enable:
+            self.appendGroupEvents(group, groupIter)
     def appendTrash(self):
         self.trashIter = self.trees.append(None, (
             -1,
@@ -358,6 +360,8 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         self.removeIterChildren(groupIter)
         ##
         group = ui.eventGroups[gid]
+        if not gid in self.loadedGroupIds:
+            return
         for event in group:
             self.trees.append(
                 groupIter,
@@ -671,13 +675,13 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                 treev.expand_row(path, False)
         elif len(path)==2:
             self.editEventByPath(path)
-    def keyPress(self, treev, g_event):
+    def keyPress(self, treev, gevent):
         #from scal2.time_utils import getGtkTimeFromEpoch
-        #print(g_event.time-getGtkTimeFromEpoch(now())## FIXME)
+        #print(gevent.time-getGtkTimeFromEpoch(now())## FIXME)
         #print(now()-gdk.CURRENT_TIME/1000.0)
         ## gdk.CURRENT_TIME == 0## FIXME
-        ## g_event.time == gtk.get_current_event_time() ## OK
-        kname = gdk.keyval_name(g_event.keyval).lower()
+        ## gevent.time == gtk.get_current_event_time() ## OK
+        kname = gdk.keyval_name(gevent.keyval).lower()
         if kname=='menu':## Simulate right click (key beside Right-Ctrl)
             path = treev.get_cursor()[0]
             if path:
@@ -697,7 +701,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                     None,
                     lambda m: (wx+dx, wy+dy+20, True),
                     3,
-                    g_event.time,
+                    gevent.time,
                 )
         elif kname=='delete':
             self.moveSelectionToTrash()
@@ -816,22 +820,22 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
             myRaise()
     def onGroupModify(self, group):
         self.waitingDo(self._do_onGroupModify, group)
-    def treeviewButtonPress(self, treev, g_event):
-        pos_t = treev.get_path_at_pos(int(g_event.x), int(g_event.y))
+    def treeviewButtonPress(self, treev, gevent):
+        pos_t = treev.get_path_at_pos(int(gevent.x), int(gevent.y))
         if not pos_t:
             return
         path, col, xRel, yRel = pos_t
         if not path:
             return
-        if g_event.button == 3:
-            self.openRightClickMenu(path, g_event.time)
-        elif g_event.button == 1:
+        if gevent.button == 3:
+            self.openRightClickMenu(path, gevent.time)
+        elif gevent.button == 1:
             if not col:
                 return
             if not rectangleContainsPoint(
                 treev.get_cell_area(path, col),
-                g_event.x,
-                g_event.y,
+                gevent.x,
+                gevent.y,
             ):
                 return
             obj_list = self.getObjsByPath(path)
@@ -857,6 +861,15 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
                             ),
                         )
                         group.save()
+                        if group.enable and \
+                            self.trees.iter_n_children(groupIter) == 0 and \
+                            len(group) > 0:
+                                for event in group:
+                                    self.trees.append(
+                                        groupIter,
+                                        self.getEventRow(event),
+                                    )
+                                self.loadedGroupIds.add(group.id)
                         self.onGroupModify(group)
                         treev.set_cursor(path)
                         return True
@@ -913,6 +926,7 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         )
         for event in newGroup:
             self.trees.append(newGroupIter, self.getEventRow(event))
+        self.loadedGroupIds.add(newGroup.id)
     def syncGroupFromMenu(self, menu, path, account):
         index, = path
         group, = self.getObjsByPath(path)
@@ -1001,10 +1015,11 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         )
         if event is None:
             return
-        self.trees.append(
-            self.trees.get_iter(path),## parent
-            self.getEventRow(event), ## row
-        )
+        if group.id in self.loadedGroupIds:
+            self.trees.append(
+                self.trees.get_iter(path),## parent
+                self.getEventRow(event), ## row
+            )
         self.treeviewCursorChanged()
     def addGenericEventToGroupFromMenu(self, menu, path, group):
         event = addNewEvent(
@@ -1016,10 +1031,11 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         )
         if event is None:
             return
-        self.trees.append(
-            self.trees.get_iter(path),## parent
-            self.getEventRow(event), ## row
-        )
+        if group.id in self.loadedGroupIds:
+            self.trees.append(
+                self.trees.get_iter(path),## parent
+                self.getEventRow(event), ## row
+            )
         self.treeviewCursorChanged()
     def editEventByPath(self, path):
         from scal2.ui_gtk.event.editor import EventEditorDialog
@@ -1211,13 +1227,14 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         index, = path
         group, = self.getObjsByPath(path)
         if GroupSortDialog(group).run():
-            groupIter = self.trees.get_iter(path)
-            expanded = self.treev.row_expanded(path)
-            self.removeIterChildren(groupIter)
-            for event in group:
-                self.trees.append(groupIter, self.getEventRow(event))
-            if expanded:
-                self.treev.expand_row(path, False)
+            if group.id in self.loadedGroupIds:
+                groupIter = self.trees.get_iter(path)
+                expanded = self.treev.row_expanded(path)
+                self.removeIterChildren(groupIter)
+                for event in group:
+                    self.trees.append(groupIter, self.getEventRow(event))
+                if expanded:
+                    self.treev.expand_row(path, False)
     def groupConvertModeFromMenu(self, menu, group):
         GroupConvertModeDialog(group).run()
     def _do_groupConvertTo(self, group, newGroupType):
@@ -1240,7 +1257,8 @@ class EventManagerDialog(gtk.Dialog, MyDialog, ud.BaseCalObj):## FIXME
         if expanded:
             self.treev.expand_row(path, False)
     def groupBulkEditFromMenu(self, menu, group, path):
-        dialog = GroupBulkEditDialog(group)
+        from scal2.ui_gtk.event.bulk_edit import EventsBulkEditDialog
+        dialog = EventsBulkEditDialog(group)
         if dialog.run()==gtk.RESPONSE_OK:
             self.waitingDo(self._do_groupBulkEdit, dialog, group, path)
     def groupActionClicked(self, menu, group, actionFuncName):
