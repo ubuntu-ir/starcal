@@ -150,6 +150,8 @@ def importEvent(gevent, group):
             minutes = gevent['reminders']['overrides']['minutes']
         except KeyError:
             myRaise()## FIXME
+            print('-------- Reminders:')
+            pprint(gevent['reminders'])
         else:
             self.notifyBefore = (minutes, 60)
     return event
@@ -530,19 +532,24 @@ def printAllEvent(account, remoteGroupId):
 
 
 if __name__=='__main__':
-    from scal2 import ui
-    account = GoogleAccount(aid=1)
-    account.load()
-    remoteGroupId = 'gi646vjovfrh2u2u2l9hnatvq0@group.calendar.google.com'
-    groupId = 66
-    ui.eventGroups.load()
-    group = ui.eventGroups[groupId]
-    #print('group.remoteIds', group.remoteIds)
-    group.remoteIds = (account.id, remoteGroupId)
-    account.sync(group, remoteGroupId)
-    group.save()
-
-
+    try:
+        from scal2 import ui
+        from scal2.json_utils import *
+        account = GoogleAccount(aid=1)
+        account.load()
+        groupId = int(sys.argv[1])
+        remoteGroupId = sys.argv[2]
+        ui.eventGroups.load()
+        group = ui.eventGroups[groupId]
+        #print('group.remoteIds', group.remoteIds)
+        group.remoteIds = (account.id, remoteGroupId)
+        #account.fetchGroups()
+        #print dataToPrettyJson(account.remoteGroups)
+        account.sync(group, remoteGroupId)
+        group.save()
+    except KeyboardInterrupt:
+        pass
+    sys.exit(0)
 
 
 
